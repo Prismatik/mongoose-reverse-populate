@@ -1,0 +1,26 @@
+{
+  "name": "mongoose-reverse-populate",
+  "version": "0.1.0",
+  "description": "TBA",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha -R spec --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Prismatik/mongoose-reverse-populate.git"
+  },
+  "keywords": [
+    "mongoose",
+    "populate"
+  ],
+  "author": "Simon Taylor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Prismatik/mongoose-reverse-populate/issues"
+  },
+  "homepage": "https://github.com/Prismatik/mongoose-reverse-populate",
+  "devDependencies": {
+    "mocha": "^2.2.1"
+  }
+}
