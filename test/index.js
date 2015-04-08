@@ -112,6 +112,7 @@ describe('reverse populate', function() {
 			})
 		});
 
+		//populate authors with their associated posts when the relationship is stored on the post model
 		it('should successfully reverse populate a one-to-many relationship', function(done) {
 			reversePopulate(authors, "posts", true, Post, "author", function(err, authResult) {
 				//expect catResult and categories to be the same
@@ -127,6 +128,33 @@ describe('reverse populate', function() {
 	});
 
 	describe('singular results', function() {
+		var categories = [];
+		var posts = [];
+		var authors = [];
+		var Category, Post, Author;
+
+		before(function(done) {
+
+			//a person has one passport
+			var personSchema = new Schema({
+				firstName: String,
+				lastName: String,
+				dob: Date
+			});
+			Person = mongoose.model('Person', personSchema);
+
+			//a passport has one owner (person)
+			var passportSchema = new Schema({
+				number: String,
+				expiry: Date,
+				owner: { type: Schema.Types.ObjectId, ref: 'Person' }
+			});
+			Passport = mongoose.model('Passport', passportSchema);
+
+			done();
+
+		}
+
 		xit('should successfully reverse populate a one-to-one relationship', function(done) {});
 	});
 });
