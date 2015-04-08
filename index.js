@@ -1,10 +1,11 @@
 var _ = require("lodash");
 
-//modelArray - the array of models that need to be populated
-//storeWhere - where should the models be stored (the property) within the models in the modelArray
-//arrayPop - if the relationship between the modelArray and model being added is 1 to many, this should be true ELSE false 
-//mongooseModel - the mongoose model that contains the model that is to be added to the models in the model Arry
-//idField - the field on the models to be added that contains the _id of the models in the modelArray
+//modelArray - the array of 'models to populate' (authors)
+//storeWhere - where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
+//arrayPop - if the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
+//mongooseModel - the mongoose model object to use to find the 'related model' e.g. Post
+//idField - the property of the 'related model' that contains the _id of the 'model to populate' e.g. "author"
+//cb - the callback function that will receive the results once db query complets and models have been populated
 var populateRelated = function(modelArray, storeWhere, arrayPop, mongooseModel, idField, cb) {
 
 	//if empty array passed, exit!
