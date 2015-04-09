@@ -3,13 +3,11 @@ var reversePopulate = require('../index.js');
 var assert = require('assert');
 var async = require('async');
 var _ = require('lodash');
-
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/mongoose-reverse-populate-test');
-var ObjectId = require("mongoose").Types.ObjectId
 
+mongoose.connect('mongodb://localhost/mongoose-reverse-populate-test');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
+
 
 var rando = function() {
 	return Math.floor(Math.random() * (1 << 24)).toString(16);
@@ -17,10 +15,10 @@ var rando = function() {
 
 describe('reverse populate', function() {
 	describe('multiple results', function() {
+		var Category, Post, Author;
 		var categories = [];
 		var posts = [];
 		var authors = [];
-		var Category, Post, Author;
 
 		before(function(done) {
 
@@ -93,7 +91,6 @@ describe('reverse populate', function() {
 				function(cb) { Post.remove({}, cb); },
 				function(cb) { Author.remove({}, cb); }
 			], done)
-
 		});
 
 		});
@@ -128,10 +125,11 @@ describe('reverse populate', function() {
 	});
 
 	describe('singular results', function() {
-		var categories = [];
-		var posts = [];
-		var authors = [];
-		var Category, Post, Author;
+		var Person, Passport;
+		var person1;
+		var passport1;
+		var person2;
+		var passport2;
 
 		before(function(done) {
 
@@ -151,11 +149,66 @@ describe('reverse populate', function() {
 			});
 			Passport = mongoose.model('Passport', passportSchema);
 
-			done();
+			Person.create({
+				firstName: rando(),
+				lastName: rando(),
+				dob: new Date(1984, 6, 27)
+			}, function (err, person) {
+				person1 = person;
 
-		}
+				Passport.create({
+					number: rando(),
+					expiry: new Date(2017, 1, 1),
+					owner: person
+				}, function(err, passport) {
+					passport1 = passport;
 
-		xit('should successfully reverse populate a one-to-one relationship', function(done) {});
+					Person.create({
+						firstName: rando(),
+						lastName: rando(),
+						dob: new Date(1984, 6, 27)
+					}, function (err, person) {
+						person2 = person;
+
+						Passport.create({
+							number: rando(),
+							expiry: new Date(2017, 1, 1),
+							owner: person
+						}, function(err, passport) {
+							passport2 = passport;
+							done();
+						});
+					});
+
+				});
+			});
+
+		});
+
+		it('should successfully reverse populate a one-to-one relationship', function(done) {
+			Person.find().exec(function(err, persons) {
+				//as this is one-to-one result should not be populated inside an array
+				reversePopulate(persons, "passport", false, Passport, "owner", function(err, personsResult) {
+					personsResult.forEach(function(person) {
+						//if this is person1, check against passport1
+						if (person._id.equals(person1._id)) {
+							idMatch(person.passport, passport1);
+						//if this is person2, check against passport2
+						} else {
+							idMatch(person.passport, passport2);
+						}
+					});
+					done();
+				});
+			});
+		});
+
+		after(function(done) {
+			async.parallel([
+				function(cb) { Person.remove({}, cb); },
+				function(cb) { Passport.remove({}, cb); },
+			], done)
+		});
 	});
 });
 
@@ -163,14 +216,12 @@ describe('reverse populate', function() {
  * Helper functions
 */
 
+//compare an array of mongoose objects
 var idsMatch = function(arr1, arr2) {
 	assert.equal(arr1.length, arr2.length);
 
 	var arr1IDs = pluckIds(arr1);
 	var arr2IDs = pluckIds(arr2);
-
-	//console.log('comparing', arr1IDs)
-	//console.log('to       ', arr2IDs);
 	
 	var diff = _.difference(arr1IDs, arr2IDs);
 	assert.equal(diff.length, 0);
@@ -179,3 +230,9 @@ var idsMatch = function(arr1, arr2) {
 var pluckIds = function(array) {
 	return array.map(function(obj) { return obj._id.toString() });
 };
+
+//compare two mongoose objects using _id
+var idMatch = function(obj1, obj2) {
+	var compare = obj1._id.equals(obj2._id);
+	assert(compare);
+}
