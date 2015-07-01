@@ -96,7 +96,14 @@ describe('reverse populate', function() {
 		});
 		//populate categories with their associated posts when the relationship is stored on the post model
 		it('should successfully reverse populate a many-to-many relationship', function(done) {
-			reversePopulate(categories, "posts", true, Post, "categories", function(err, catResult) {
+			var opts = {
+				modelArray: categories,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "categories"
+			}
+			reversePopulate(opts, function(err, catResult) {
 				//expect catResult and categories to be the same
 				idsMatch(catResult, categories);
 
@@ -111,7 +118,14 @@ describe('reverse populate', function() {
 
 		//populate authors with their associated posts when the relationship is stored on the post model
 		it('should successfully reverse populate a one-to-many relationship', function(done) {
-			reversePopulate(authors, "posts", true, Post, "author", function(err, authResult) {
+			var opts = {
+				modelArray: authors,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "author"
+			}
+			reversePopulate(opts, function(err, authResult) {
 				//expect catResult and categories to be the same
 				idsMatch(authResult, authors);
 
@@ -187,8 +201,15 @@ describe('reverse populate', function() {
 
 		it('should successfully reverse populate a one-to-one relationship', function(done) {
 			Person.find().exec(function(err, persons) {
+				var opts = {
+					modelArray: persons,
+					storeWhere: "passport",
+					arrayPop: false,
+					mongooseModel: Passport,
+					idField: "owner"
+				}
 				//as this is one-to-one result should not be populated inside an array
-				reversePopulate(persons, "passport", false, Passport, "owner", function(err, personsResult) {
+				reversePopulate(opts, function(err, personsResult) {
 					personsResult.forEach(function(person) {
 						//if this is person1, check against passport1
 						if (person._id.equals(person1._id)) {
