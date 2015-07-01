@@ -23,8 +23,8 @@
   "homepage": "https://github.com/Prismatik/mongoose-reverse-populate",
   "devDependencies": {
     "async": "^0.9.0",
-    "mocha": "^2.2.1",
-    "mongoose": "^3.8.25"
+    "mongoose": "^4.0.6",
+    "mocha": "^2.2.1"
   },
   "dependencies": {
     "underscore": "^1.8.3"

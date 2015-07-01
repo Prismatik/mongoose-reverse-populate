@@ -1,5 +1,7 @@
 # Mongoose Reverse Populate
 
+[![Build Status](https://travis-ci.org/Prismatik/mongoose-reverse-populate.svg?branch=master)](https://travis-ci.org/Prismatik/mongoose-reverse-populate)
+
 This module allows you to 'populate' a mongoose model (referred to as the 'model to populate') where the relationship ids are stored on another mongoose model that is related to this model (referred to as the 'related model').
 
 For example, you have an Author Model and a Post Model and the Post Model stores the Author id.
