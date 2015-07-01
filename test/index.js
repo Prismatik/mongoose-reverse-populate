@@ -105,10 +105,12 @@ describe('reverse populate', function() {
 			}
 			reversePopulate(opts, function(err, catResult) {
 				//expect catResult and categories to be the same
+				assert.equal(catResult.length, 2);
 				idsMatch(catResult, categories);
 
 				//expect each catResult to contain the posts
 				catResult.forEach(function(category) {
+					assert.equal(category.posts.length, 5);
 					idsMatch(category.posts, posts);
 				});
 
@@ -127,11 +129,13 @@ describe('reverse populate', function() {
 			}
 			reversePopulate(opts, function(err, authResult) {
 				//expect catResult and categories to be the same
+				assert.equal(authResult.length, 1);
 				idsMatch(authResult, authors);
 
 				//expect each catResult to contain the posts
 				authResult.forEach(function(author) {
 					idsMatch(author.posts, posts);
+					assert.equal(author.posts.length, 5);
 				});
 				done();
 			});
