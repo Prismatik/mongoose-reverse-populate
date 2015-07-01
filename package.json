@@ -28,5 +28,8 @@
   },
   "dependencies": {
     "underscore": "^1.8.3"
+  },
+  "engines": {
+    "node": "0.12.5"
   }
 }
