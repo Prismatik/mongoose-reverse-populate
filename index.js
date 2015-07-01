@@ -1,4 +1,4 @@
-var _ = require("lodash");
+var _ = require("underscore");
 var MANDATORY_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
 //modelArray - the array of 'models to populate' (authors)

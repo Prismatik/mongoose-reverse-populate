@@ -2,7 +2,7 @@ var reversePopulate = require('../index.js');
 
 var assert = require('assert');
 var async = require('async');
-var _ = require('lodash');
+var _ = require('underscore');
 var mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost/mongoose-reverse-populate-test');
