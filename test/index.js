@@ -140,6 +140,34 @@ describe('reverse populate', function() {
 				done();
 			});
 		});
+
+		//test to ensure filtering results works as expected
+		it('should successfully filter results', function(done) {
+			//pick a random post to be filtered (the first one)
+			var firstPost = posts[0];
+
+			var opts = {
+				modelArray: authors,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "author",
+				filters: {title: {$ne: firstPost.title}}
+			}
+			reversePopulate(opts, function(err, authResult) {
+				assert.equal(authResult.length, 1)
+				var author = authResult[0];
+
+				//the authors posts should exclude the title passed as a filter
+				//there are 10 posts for this author and 1 title is excluded so expect 9
+				assert.equal(author.posts.length, 4);
+				author.posts.forEach(function(post) {
+					assert.notEqual(firstPost.title, post.title);
+				})
+
+				done();
+			});
+		});
 	});
 
 	describe('singular results', function() {
