@@ -16,12 +16,10 @@ var rando = function() {
 describe('reverse populate', function() {
 	describe('multiple results', function() {
 		var Category, Post, Author;
-		var categories = [];
-		var posts = [];
-		var authors = [];
+		var categories, posts, authors;
 
+		//define schemas and models for tests
 		before(function(done) {
-
 			//a category has many posts
 			var categorySchema = new Schema({
 				name: String,
@@ -43,11 +41,16 @@ describe('reverse populate', function() {
 				lastName: String
 			});
 			Author = mongoose.model('Author', authorSchema);
+			done();
+		})
 
+		//create 2 x categories, 1 x author and 10 x posts
+		beforeEach(function(done) {
 			Category.create({
 				name: rando()
 			}, function(err, category) {
 				assert.deepEqual(err, null);
+				categories = [];
 				categories.push(category);
 
 				Category.create({
@@ -61,9 +64,11 @@ describe('reverse populate', function() {
 						lastName: rando(),
 					}, function(err, author) {
 						assert.deepEqual(err, null);
+						authors = [];
 						authors.push(author);
 
 						//create multi category posts
+						posts = [];
 						for (i = 0; i < 5; i++) {
 							newPost = new Post({
 								title: rando(),
@@ -78,14 +83,15 @@ describe('reverse populate', function() {
 							post.save(cb)
 						}, function(err, result) {
 							done();
-						})
+						});
 
 					});
 				});
 
 			});
+		});
 		
-		after(function(done) {
+		afterEach(function(done) {
 			async.parallel([
 				function(cb) { Category.remove({}, cb); },
 				function(cb) { Post.remove({}, cb); },
@@ -93,7 +99,6 @@ describe('reverse populate', function() {
 			], done)
 		});
 
-		});
 		//populate categories with their associated posts when the relationship is stored on the post model
 		it('should successfully reverse populate a many-to-many relationship', function(done) {
 			var opts = {
@@ -172,13 +177,10 @@ describe('reverse populate', function() {
 
 	describe('singular results', function() {
 		var Person, Passport;
-		var person1;
-		var passport1;
-		var person2;
-		var passport2;
+		var person1, person2, passport1, passport2;
 
+		//define schemas and models for tests
 		before(function(done) {
-
 			//a person has one passport
 			var personSchema = new Schema({
 				firstName: String,
@@ -194,7 +196,11 @@ describe('reverse populate', function() {
 				owner: { type: Schema.Types.ObjectId, ref: 'Person' }
 			});
 			Passport = mongoose.model('Passport', passportSchema);
+			done();
+		});
 
+		//create 2 x people, 2 x passports
+		beforeEach(function(done) {
 			Person.create({
 				firstName: rando(),
 				lastName: rando(),
@@ -225,10 +231,15 @@ describe('reverse populate', function() {
 							done();
 						});
 					});
-
 				});
 			});
+		});
 
+		afterEach(function(done) {
+			async.parallel([
+				function(cb) { Person.remove({}, cb); },
+				function(cb) { Passport.remove({}, cb); },
+			], done)
 		});
 
 		it('should successfully reverse populate a one-to-one relationship', function(done) {
@@ -256,12 +267,6 @@ describe('reverse populate', function() {
 			});
 		});
 
-		after(function(done) {
-			async.parallel([
-				function(cb) { Person.remove({}, cb); },
-				function(cb) { Passport.remove({}, cb); },
-			], done)
-		});
 	});
 });
 
