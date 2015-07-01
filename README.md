@@ -46,6 +46,7 @@ The opts object should contain the following properties...
 * arrayPop - if the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
 * mongooseModel - the mongoose model object to use to find the 'related model' e.g. Post
 * idField - the property of the 'related model' that contains the _id of the 'model to populate' e.g. "author"
+* filters (optional) - this allows you to pass additional "criteria" to the mongoose query (.find) that fetches your 'related models'. For example you might wish to exclude models that have an active property set to false e.g. {active: {$ne: false}}. The syntax for filters is identical to that used with mongoose .find and is passed directly into the query. Note filters determines what to include and not what to exclude!
 
 The callback function will be run once the objects are populated and will receive the populated modelArray as the success parameter of the function.
 
