@@ -29,7 +29,7 @@ var populateRelated = function(opts, cb) {
 	var ids = opts.modelArray.map(function(model) { return model._id });
 
 	//search for all models that match the above ids
-	var query = {}
+	var query = opts.filters || {}
 	query[opts.idField] = {$in: ids}
 	opts.mongooseModel.find(query).exec(function(err, results) {
 		if (err) return cb(err)
