@@ -6,22 +6,20 @@ var MANDATORY_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel",
  * reversePopulate
  * @constructor
  * @description This module allows you to 'populate' a mongoose model (referred to as the 'model to populate') where the relationship ids are stored on another mongoose model that is related to this model (referred to as the 'related model').
- * @callback cb - the callback function that will receive the results once db query complets and models have been populated
  * @param {Object} opts - The object of options
- *
- * Mandatory properties
+ * Mandatory properties in opts
  * @param {Object[]} opts.modelArray - The array of 'models to populate' (authors)
  * @param {string} opts.storeWhere - Where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
  * @param {Bool} opts.arrayPop - If the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
  * @param {Object} opts.mongooseModel - The mongoose model object to use to find the 'related model' e.g. Post
  * @param {string} opts.idField - Yhe property of the 'related model' that contains the _id of the 'model to populate' e.g. "author"
  * @param {Object} opts.filters - If you do not wish to limit which 'related models' are searched for (via .find) and then populated (i.e. inactive / disabled models)
- *
- * Optional properties
+ * Optional properties in opts
  * @param {string} opts.select - The string to setup select() in mongoose query
  * @param {string} opts.populate - The string to setup populate() in mongoose query
  * @param {string} opts.limit - The string to setup limit() in mongoose query
  * @param {string} opts.sort - The string to setup sort() in mongoose query
+ * @callback cb - the callback function that will receive the results once db query complets and models have been populated
  */
 
 function populateRelated(opts, cb) {
