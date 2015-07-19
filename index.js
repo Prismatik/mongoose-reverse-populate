@@ -17,7 +17,7 @@ var populateRelated = function(opts, cb) {
 			var error = new Error("Missing mandatory field " + fieldName);
 			cb(error);
 		}
-	})
+	});
 
 	//if empty array passed, exit!
 	if (!opts.modelArray.length) return cb(null, opts.modelArray);
@@ -25,56 +25,56 @@ var populateRelated = function(opts, cb) {
 	//transform the model array for easy lookups
 	var modelIndex = _.indexBy(opts.modelArray, "_id");
 
-	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop)
+	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
 	//find the ids of models within the opts.modelArray
-	var ids = opts.modelArray.map(function(model) { return model._id });
+	var ids = opts.modelArray.map(function(model) { return model._id; });
 
 	//search for all models that match the above ids
-	var query = opts.filters || {}
-	query[opts.idField] = {$in: ids}
+	var query = opts.filters || {};
+	query[opts.idField] = {$in: ids};
 	opts.mongooseModel.find(query).exec(function(err, results) {
-		if (err) return cb(err)
+		if (err) return cb(err);
 
 		//map over results (models to be populated)
 		results.forEach(function(result) {
 			//check if the ID field is an array
-			var isArray = !isNaN(result[opts.idField].length)
+			var isArray = !isNaN(result[opts.idField].length);
 			//if the idField is an array, map through this
 			if (isArray) {
 				result[opts.idField].map(function(resultId) {
 					var match = modelIndex[resultId];
 					//if match found, populate the result inside the match
-					if (match) popResult(match, result)
-				})
+					if (match) popResult(match, result);
+				});
 			//id field is not an array
 			} else {
 				//so just add the result to the model
-				var matchId = result[opts.idField]
-				var match = modelIndex[matchId]
+				var matchId = result[opts.idField];
+				var match = modelIndex[matchId];
 				//if match found, populate the result inside the match
-				if (match) popResult(match, result)
+				if (match) popResult(match, result);
 			}
 		});
 
 		//return the modelArray
-		cb(null, opts.modelArray)
-	})
-}
+		cb(null, opts.modelArray);
+	});
+};
 
 //to populate the result against the match
 var populateResult = function(storeWhere, arrayPop, match, result) {
 	//if this is a one to many relationship
 	if (arrayPop) {
 		//check if array exists, if not create one
-		if (typeof match[storeWhere] === "undefined") match[storeWhere] = []
+		if (typeof match[storeWhere] === "undefined") match[storeWhere] = [];
 		//push the result into the array
-		match[storeWhere].push(result)
+		match[storeWhere].push(result);
 	//this is a one to one relationship
 	} else {
 		//save the results
-		match[storeWhere] = result
+		match[storeWhere] = result;
 	}
-}
+};
 
-module.exports = populateRelated
+module.exports = populateRelated;
