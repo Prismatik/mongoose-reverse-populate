@@ -42,7 +42,7 @@ describe('reverse populate', function() {
 			});
 			Author = mongoose.model('Author', authorSchema);
 			done();
-		})
+		});
 
 		//create 2 x categories, 1 x author and 10 x posts
 		beforeEach(function(done) {
@@ -80,7 +80,7 @@ describe('reverse populate', function() {
 						
 						//save all posts
 						async.each(posts, function(post, cb) {
-							post.save(cb)
+							post.save(cb);
 						}, function(err, result) {
 							done();
 						});
@@ -96,7 +96,7 @@ describe('reverse populate', function() {
 				function(cb) { Category.remove({}, cb); },
 				function(cb) { Post.remove({}, cb); },
 				function(cb) { Author.remove({}, cb); }
-			], done)
+			], done);
 		});
 
 		//populate categories with their associated posts when the relationship is stored on the post model
@@ -107,7 +107,7 @@ describe('reverse populate', function() {
 				arrayPop: true,
 				mongooseModel: Post,
 				idField: "categories"
-			}
+			};
 			reversePopulate(opts, function(err, catResult) {
 				//expect catResult and categories to be the same
 				assert.equal(catResult.length, 2);
@@ -119,8 +119,8 @@ describe('reverse populate', function() {
 					idsMatch(category.posts, posts);
 				});
 
-				done()
-			})
+				done();
+			});
 		});
 
 		//populate authors with their associated posts when the relationship is stored on the post model
@@ -131,7 +131,7 @@ describe('reverse populate', function() {
 				arrayPop: true,
 				mongooseModel: Post,
 				idField: "author"
-			}
+			};
 			reversePopulate(opts, function(err, authResult) {
 				//expect catResult and categories to be the same
 				assert.equal(authResult.length, 1);
@@ -158,9 +158,9 @@ describe('reverse populate', function() {
 				mongooseModel: Post,
 				idField: "author",
 				filters: {title: {$ne: firstPost.title}}
-			}
+			};
 			reversePopulate(opts, function(err, authResult) {
-				assert.equal(authResult.length, 1)
+				assert.equal(authResult.length, 1);
 				var author = authResult[0];
 
 				//the authors posts should exclude the title passed as a filter
@@ -168,7 +168,7 @@ describe('reverse populate', function() {
 				assert.equal(author.posts.length, 4);
 				author.posts.forEach(function(post) {
 					assert.notEqual(firstPost.title, post.title);
-				})
+				});
 
 				done();
 			});
@@ -239,7 +239,7 @@ describe('reverse populate', function() {
 			async.parallel([
 				function(cb) { Person.remove({}, cb); },
 				function(cb) { Passport.remove({}, cb); },
-			], done)
+			], done);
 		});
 
 		it('should successfully reverse populate a one-to-one relationship', function(done) {
@@ -250,7 +250,7 @@ describe('reverse populate', function() {
 					arrayPop: false,
 					mongooseModel: Passport,
 					idField: "owner"
-				}
+				};
 				//as this is one-to-one result should not be populated inside an array
 				reversePopulate(opts, function(err, personsResult) {
 					personsResult.forEach(function(person) {
@@ -286,11 +286,11 @@ var idsMatch = function(arr1, arr2) {
 };
 
 var pluckIds = function(array) {
-	return array.map(function(obj) { return obj._id.toString() });
+	return array.map(function(obj) { return obj._id.toString(); });
 };
 
 //compare two mongoose objects using _id
 var idMatch = function(obj1, obj2) {
 	var compare = obj1._id.equals(obj2._id);
 	assert(compare);
-}
+};
