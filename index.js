@@ -13,8 +13,10 @@ var populateRelated = function(opts, cb) {
 	//check all mandatory fields have been provided
 	MANDATORY_FIELDS.forEach(function(fieldName) {
 		var type = typeof opts[fieldName];
-		if (type === "undefined" || type === "null") 
-			throw new Error("Missing mandatory field " + fieldName);
+		if (type === "undefined" || type === "null") {
+			var error = new Error("Missing mandatory field " + fieldName);
+			cb(error);
+		}
 	})
 
 	//if empty array passed, exit!
