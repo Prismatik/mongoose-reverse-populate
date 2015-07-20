@@ -22,7 +22,7 @@ var MANDATORY_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel",
  * @callback cb - the callback function that will receive the results once db query complets and models have been populated
  */
 
-function populateRelated(opts, cb) {
+function reversePopulate(opts, cb) {
 
 	// Check all mandatory fields have been provided
 	MANDATORY_FIELDS.forEach(function(fieldName) {
@@ -123,4 +123,4 @@ function populateResult(storeWhere, arrayPop, match, result) {
 	}
 }
 
-module.exports = populateRelated;
+module.exports = reversePopulate;
