@@ -1,16 +1,29 @@
 var _ = require("underscore");
 var MANDATORY_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
-//modelArray - the array of 'models to populate' (authors)
-//storeWhere - where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
-//arrayPop - if the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
-//mongooseModel - the mongoose model object to use to find the 'related model' e.g. Post
-//idField - the property of the 'related model' that contains the _id of the 'model to populate' e.g. "author"
-//filters - if you do not wish to limit which 'related models' are searched for (via .find) and then populated (i.e. inactive / disabled models)
-//cb - the callback function that will receive the results once db query complets and models have been populated
-var populateRelated = function(opts, cb) {
+/**
+ * reversePopulate
+ * @constructor
+ * @description This module allows you to 'populate' a mongoose model (referred to as the 'model to populate') where the relationship ids are stored on another mongoose model that is related to this model (referred to as the 'related model').
+ * @param {Object} opts - The object of options
+ * Mandatory properties in opts
+ * @param {Object[]} opts.modelArray - The array of 'models to populate' (authors)
+ * @param {string} opts.storeWhere - Where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
+ * @param {Bool} opts.arrayPop - If the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
+ * @param {Object} opts.mongooseModel - The mongoose model object to use to find the 'related model' e.g. Post
+ * @param {string} opts.idField - Yhe property of the 'related model' that contains the _id of the 'model to populate' e.g. "author"
+ * @param {Object} opts.filters - If you do not wish to limit which 'related models' are searched for (via .find) and then populated (i.e. inactive / disabled models)
+ * Optional properties in opts
+ * @param {string} opts.select - The string to setup select() in mongoose query
+ * @param {string} opts.populate - The string to setup populate() in mongoose query
+ * @param {string} opts.limit - The string to setup limit() in mongoose query
+ * @param {string} opts.sort - The string to setup sort() in mongoose query
+ * @callback cb - the callback function that will receive the results once db query complets and models have been populated
+ */
 
-	//check all mandatory fields have been provided
+function reversePopulate(opts, cb) {
+
+	// Check all mandatory fields have been provided
 	MANDATORY_FIELDS.forEach(function(fieldName) {
 		var type = typeof opts[fieldName];
 		if (type === "undefined" || type === "null") {
@@ -19,62 +32,96 @@ var populateRelated = function(opts, cb) {
 		}
 	});
 
-	//if empty array passed, exit!
+	// If empty array passed, exit!
 	if (!opts.modelArray.length) return cb(null, opts.modelArray);
 
-	//transform the model array for easy lookups
+	// Transform the model array for easy lookups
 	var modelIndex = _.indexBy(opts.modelArray, "_id");
 
 	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
-	//find the ids of models within the opts.modelArray
-	var ids = opts.modelArray.map(function(model) { return model._id; });
+	// Find the ids of models within the opts.modelArray
+	var ids = opts.modelArray.map(function(model) { return model._id });
 
-	//search for all models that match the above ids
-	var query = opts.filters || {};
-	query[opts.idField] = {$in: ids};
-	opts.mongooseModel.find(query).exec(function(err, results) {
-		if (err) return cb(err);
+	// Search for all models that match the above ids
+	var query = opts.filters || {}
 
-		//map over results (models to be populated)
-		results.forEach(function(result) {
-			//check if the ID field is an array
-			var isArray = !isNaN(result[opts.idField].length);
-			//if the idField is an array, map through this
-			if (isArray) {
-				result[opts.idField].map(function(resultId) {
-					var match = modelIndex[resultId];
-					//if match found, populate the result inside the match
-					if (match) popResult(match, result);
-				});
-			//id field is not an array
-			} else {
-				//so just add the result to the model
-				var matchId = result[opts.idField];
-				var match = modelIndex[matchId];
-				//if match found, populate the result inside the match
-				if (match) popResult(match, result);
-			}
-		});
+	// Create query object
+	query[opts.idField] = { $in: ids };
 
-		//return the modelArray
-		cb(null, opts.modelArray);
+	// Set query select() parameter or if it's null, return empty string
+	var select = opts.select || '';
+
+	// Set query populate() parameter or if it's null, return empty string
+	var populate = opts.populate || '';
+
+	// Set query limit() parameter or if it's null, return empty string
+	var limit = opts.limit || '';
+
+	// Set query sort() parameter or if it's null, return empty string
+	var sort = opts.sort || '';
+
+	// Do the query
+	opts.mongooseModel
+		.find(query)
+		.select(select)
+		.populate(populate)
+		.limit(limit)
+  	.sort(sort)
+		.exec(function(err, results) {
+
+			// If there is an error, callback with error
+			if (err)
+				return cb(err)
+
+			// Map over results (models to be populated)
+			results.forEach(function(result) {
+
+				// Check if the ID field is an array
+				var isArray = !isNaN(result[opts.idField].length);
+
+				// If the idField is an array, map through this
+				if (isArray) {
+					result[opts.idField].map(function(resultId) {
+						var match = modelIndex[resultId];
+						// If match found, populate the result inside the match
+						if (match) popResult(match, result)
+					});
+
+				// Id field is not an array
+				} else {
+					// So just add the result to the model
+					var matchId = result[opts.idField]
+					var match = modelIndex[matchId]
+
+					// If match found, populate the result inside the match
+					if (match) popResult(match, result)
+				}
+			});
+
+		// Callback with passed modelArray
+		cb(null, opts.modelArray)
 	});
-};
+}
 
-//to populate the result against the match
-var populateResult = function(storeWhere, arrayPop, match, result) {
-	//if this is a one to many relationship
+// Populate the result against the match
+function populateResult(storeWhere, arrayPop, match, result) {
+
+	// If this is a one to many relationship
 	if (arrayPop) {
-		//check if array exists, if not create one
+
+		// Check if array exists, if not create one
 		if (typeof match[storeWhere] === "undefined") match[storeWhere] = [];
-		//push the result into the array
+
+		// Push the result into the array
 		match[storeWhere].push(result);
-	//this is a one to one relationship
+
+	// This is a one to one relationship
 	} else {
-		//save the results
+
+		// Save the results
 		match[storeWhere] = result;
 	}
 };
 
-module.exports = populateRelated;
+module.exports = reversePopulate;
