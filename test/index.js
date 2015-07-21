@@ -176,7 +176,6 @@ describe('reverse populate', function() {
 			});
 		});
 
-		//test to ensure filtering results works as expected
 		it('should successfully select only the desired fields', function(done) {
 			var opts = {
 				modelArray: authors,
