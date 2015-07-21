@@ -31,7 +31,8 @@ describe('reverse populate', function() {
 			var postSchema = new Schema({
 				title: String,
 				categories: [{ type: Schema.Types.ObjectId, ref: 'Category' }],
-				author: { type: Schema.Types.ObjectId, ref: 'Author' }
+				author: { type: Schema.Types.ObjectId, ref: 'Author' },
+				content: String
 			});
 			Post = mongoose.model('Post', postSchema);
 
@@ -73,7 +74,8 @@ describe('reverse populate', function() {
 							newPost = new Post({
 								title: rando(),
 								categories: categories,
-								author: author
+								author: author,
+								content: rando()
 							});
 							posts.push(newPost);
 						}
@@ -168,6 +170,33 @@ describe('reverse populate', function() {
 				assert.equal(author.posts.length, 4);
 				author.posts.forEach(function(post) {
 					assert.notEqual(firstPost.title, post.title);
+				});
+
+				done();
+			});
+		});
+
+		//test to ensure filtering results works as expected
+		it('should successfully select only the desired fields', function(done) {
+			var opts = {
+				modelArray: authors,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "author",
+				select: "title author"
+			};
+			reversePopulate(opts, function(err, authResult) {
+				assert.equal(authResult.length, 1);
+				var author = authResult[0];
+
+				assert.equal(author.posts.length, 5);
+				author.posts.forEach(function(post) {
+					//expect these two to be populated
+					assert.notEqual(typeof post.author, "undefined")
+					assert.notEqual(typeof post.title, "undefined")
+					//expect this to be undefined
+					assert.equal(typeof post.catgegory, "undefined")
 				});
 
 				done();
