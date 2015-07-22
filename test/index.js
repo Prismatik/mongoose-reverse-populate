@@ -176,7 +176,7 @@ describe('reverse populate', function() {
 			});
 		});
 
-		it('should successfully select only the desired fields', function(done) {
+		it('should \"select\" only the desired fields', function(done) {
 			var opts = {
 				modelArray: authors,
 				storeWhere: "posts",
@@ -199,6 +199,24 @@ describe('reverse populate', function() {
 					assert.equal(typeof post.catgegory, "undefined")
 				});
 
+				done();
+			});
+		});
+
+		it('should \"limit\" the results returned', function(done) {
+			var opts = {
+				modelArray: authors,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "author",
+				limit: 3
+			};
+			reversePopulate(opts, function(err, authResult) {
+				assert.equal(authResult.length, 1);
+				var author = authResult[0];
+
+				assert.equal(author.posts.length, 3);
 				done();
 			});
 		});
