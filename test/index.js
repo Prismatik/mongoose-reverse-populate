@@ -183,7 +183,7 @@ describe('reverse populate', function() {
 				arrayPop: true,
 				mongooseModel: Post,
 				idField: "author",
-				select: "title author"
+				select: "title"
 			};
 			reversePopulate(opts, function(err, authResult) {
 				assert.equal(authResult.length, 1);
@@ -192,6 +192,7 @@ describe('reverse populate', function() {
 				assert.equal(author.posts.length, 5);
 				author.posts.forEach(function(post) {
 					//expect these two to be populated
+					//author is automatically included as it's required to perform the populate
 					assert.notEqual(typeof post.author, "undefined")
 					assert.notEqual(typeof post.title, "undefined")
 					//expect this to be undefined
