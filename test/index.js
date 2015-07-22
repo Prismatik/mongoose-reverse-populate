@@ -220,6 +220,29 @@ describe('reverse populate', function() {
 				done();
 			});
 		});
+
+		it('should \"sort\" the results returned', function(done) {
+			var sortedTitles = _.pluck(posts, "title").sort();
+
+			var opts = {
+				modelArray: authors,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "author",
+				sort: "title"
+			};
+			reversePopulate(opts, function(err, authResult) {
+				assert.equal(authResult.length, 1);
+				var author = authResult[0];
+
+				assert.equal(author.posts.length, 5);
+				var postTitles =  _.pluck(author.posts, "title");
+				assert.deepEqual(sortedTitles, postTitles);
+
+				done();
+			});
+		});
 	});
 
 	describe('singular results', function() {
