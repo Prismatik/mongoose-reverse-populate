@@ -49,17 +49,8 @@ function reversePopulate(opts, cb) {
 	// Create query object
 	query[opts.idField] = { $in: ids };
 
-	// Set query select() parameter or if it's null, return empty string
-	if (opts.select) {
-		var selected = opts.select.split(" ");
-		console.log("selected", selected)
-		var idIncluded = !!~selected.indexOf(opts.idField)
-		if (!idIncluded) {
-			opts.select = opts.select + " " + opts.idField
-		}
-	}
-
-	var select = opts.select || '';
+	// Set query select() parameter
+	var select = getSelectString(opts.select, opts.idField)
 
 	// Set query populate() parameter or if it's null, return empty string
 	var populate = opts.populate || '';
@@ -132,5 +123,15 @@ function populateResult(storeWhere, arrayPop, match, result) {
 		match[storeWhere] = result;
 	}
 };
+
+//ensure the select option always includes the required id field to populate the relationship
+function getSelectString(selectStr, requiredId) {
+	if (!selectStr) return "";
+
+	var selected = selectStr.split(" ");
+	var idIncluded = !!~selected.indexOf(requiredId);
+	if (!idIncluded) return selectStr + " " + requiredId;
+	return selectStr;
+}
 
 module.exports = reversePopulate;
