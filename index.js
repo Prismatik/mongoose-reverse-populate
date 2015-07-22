@@ -50,6 +50,15 @@ function reversePopulate(opts, cb) {
 	query[opts.idField] = { $in: ids };
 
 	// Set query select() parameter or if it's null, return empty string
+	if (opts.select) {
+		var selected = opts.select.split(" ");
+		console.log("selected", selected)
+		var idIncluded = !!~selected.indexOf(opts.idField)
+		if (!idIncluded) {
+			opts.select = opts.select + " " + opts.idField
+		}
+	}
+
 	var select = opts.select || '';
 
 	// Set query populate() parameter or if it's null, return empty string
