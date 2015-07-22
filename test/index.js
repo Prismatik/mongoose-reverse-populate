@@ -243,6 +243,30 @@ describe('reverse populate', function() {
 				done();
 			});
 		});
+
+		//use reverse populate to populate posts within author
+		//use standard populate to nest categories in posts
+		it('should \"populate\" the results returned', function(done) {
+			var opts = {
+				modelArray: authors,
+				storeWhere: "posts",
+				arrayPop: true,
+				mongooseModel: Post,
+				idField: "author",
+				populate: "categories"
+			};
+			reversePopulate(opts, function(err, authResult) {
+				assert.equal(authResult.length, 1);
+				idsMatch(authResult, authors);
+
+				var author = authResult[0];
+				author.posts.forEach(function(post) {
+					assert.equal(post.categories.length, 2)
+					idsMatch(post.categories, categories);
+				});
+				done();
+			});
+		});
 	});
 
 	describe('singular results', function() {

@@ -67,7 +67,7 @@ function reversePopulate(opts, cb) {
 		.select(select)
 		.populate(populate)
 		.limit(limit)
-  	.sort(sort)
+		.sort(sort)
 		.exec(function(err, results) {
 
 			// If there is an error, callback with error
