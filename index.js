@@ -99,6 +99,8 @@ function reversePopulate(opts, cb) {
 	});
 }
 
+module.exports = reversePopulate;
+
 // Populate the result against the match
 function populateResult(storeWhere, arrayPop, match, result) {
 
@@ -129,14 +131,10 @@ function getSelectString(selectStr, requiredId) {
 	return selectStr;
 }
 
-module.exports = reversePopulate;
-
+// Check all mandatory fields have been provided
 function checkRequired(required, opts) {
-	// Check all mandatory fields have been provided
+	var msg = "Missing mandatory field "
 	required.forEach(function(fieldName) {
-		var type = typeof opts[fieldName];
-		if (type === "undefined" || type === "null") {
-			throw new Error("Missing mandatory field " + fieldName);
-		}
+		if (opts[fieldName] == null) throw new Error(msg + fieldName);
 	});
 }
