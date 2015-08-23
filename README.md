@@ -7,7 +7,7 @@ This module allows you to 'populate' a mongoose model (referred to as the 'model
 For example, you have an Author Model and a Post Model and the Post Model stores the Author id.
 Note: An Author can have many Posts but a Post can only have one Author.
 
-You can use a standard populate call if you wish to retrieve all Posts and populate their Author. But you cannot use this if you want to retrieve all Authors and populate all of that Author's Posts as the ids reside on the wrong model. 
+You can use a standard populate call if you wish to retrieve all Posts and populate their Author. But you cannot use this if you want to retrieve all Authors and populate all of that Author's Posts as the ids reside on the wrong model.
 
 ## Using the function
 
@@ -39,14 +39,25 @@ The function expects an opts object (options) and callback to be passed into it
 
 function(opts, callback) {...}
 
-The opts object should contain the following properties...
+#### opts
 
-* modelArray - the array of 'models to populate' (authors)
-* storeWhere - where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
+The options object should contain the following properties...
+
+**Required properties**
+* modelArray (array) - the array of 'models to populate' (authors)
+* storeWhere (string) - where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
 * arrayPop - if the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
-* mongooseModel - the mongoose model object to use to find the 'related model' e.g. Post
-* idField - the property of the 'related model' that contains the _id of the 'model to populate' e.g. "author"
-* filters (optional) - this allows you to pass additional "criteria" to the mongoose query (.find) that fetches your 'related models'. For example you might wish to exclude models that have an active property set to false e.g. {active: {$ne: false}}. The syntax for filters is identical to that used with mongoose .find and is passed directly into the query. Note filters determines what to include and not what to exclude!
+* mongooseModel (object) - the mongoose model object to use to find the 'related model' e.g. Post
+* idField (string) - the property of the 'related model' that contains the \_id of the 'model to populate' e.g. "author"
+
+**Optional properties**
+* filters (object) - this allows you to pass additional "criteria" to the mongoose query (.find) that fetches your 'related models'. For example you might wish to exclude models that have an active property set to false e.g. {active: {$ne: false}}. The syntax for filters is identical to that used with mongoose .find and is passed directly into the query. Note filters determines what to include and not what to exclude!
+* select (object / string) - restrict which fields are returned for your 'related models', see [Query#select](http://mongoosejs.com/docs/api.html#query_Query-select)
+* populate (object / string) - populate your 'related models' with their related models, see [Query#populate](http://mongoosejs.com/docs/api.html#query_Query-populate)
+* limit (number) - limit how many results are returned for your 'related models', see [Query#limit](http://mongoosejs.com/docs/api.html#query_Query-limit)
+* sort (object / string) - sort your 'related models', see [Query#sort](http://mongoosejs.com/docs/api.html#query_Query-sort)
+
+#### callback
 
 The callback function will be run once the objects are populated and will receive the populated modelArray as the success parameter of the function.
 
