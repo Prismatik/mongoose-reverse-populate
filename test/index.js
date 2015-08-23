@@ -170,7 +170,7 @@ describe('reverse populate', function() {
 		});
 
 		//test to ensure filtering results works as expected
-		it('should successfully filter results', function(done) {
+		it('should \"filter\" the query results', function(done) {
 			//pick a random post to be filtered (the first one)
 			var firstPost = posts[0];
 
