@@ -224,24 +224,6 @@ describe('reverse populate', function() {
 			});
 		});
 
-		it('should \"limit\" the results returned', function(done) {
-			var opts = {
-				modelArray: authors,
-				storeWhere: "posts",
-				arrayPop: true,
-				mongooseModel: Post,
-				idField: "author",
-				limit: 3
-			};
-			reversePopulate(opts, function(err, authResult) {
-				assert.equal(authResult.length, 1);
-				var author = authResult[0];
-
-				assert.equal(author.posts.length, 3);
-				done();
-			});
-		});
-
 		it('should \"sort\" the results returned', function(done) {
 			var sortedTitles = _.pluck(posts, "title").sort();
 
