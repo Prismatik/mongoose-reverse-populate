@@ -35,13 +35,9 @@ function reversePopulate(opts, cb) {
 
 	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
-	// Find the ids of models within the opts.modelArray
-	var ids = opts.modelArray.map(function(model) { return model._id });
-
-	// Search for all models that match the above ids
-	var query = opts.filters || {}
-
-	// Create query object
+	// build the query string
+	var query = opts.filters || {};
+	var ids = _.pluck(opts.modelArray, "_id");
 	query[opts.idField] = { $in: ids };
 
 	// Set query select() parameter
