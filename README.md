@@ -73,3 +73,7 @@ It would be much more efficient to fetch all of the Authors and then perform a s
 You will notice if you perform a console.log statement on your 'models to populate' after using the reverse populate that it may appear as if no models were populated. This is because the property the 'related models' are being added to is not defined in the schema but be assured the population has still work.
 
 In the above, if you console.log the popAuthors they will appear as if they have no .posts property. But if you loop through the popAuthors and console.log the posts property of each author you will then see the results as expected.
+
+## Contributors
+
+Thanks to [zoltanradics](https://github.com/zoltanradics)
