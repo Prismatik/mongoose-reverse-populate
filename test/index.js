@@ -8,7 +8,6 @@ var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/mongoose-reverse-populate-test');
 var Schema = mongoose.Schema;
 
-
 var rando = function() {
 	return Math.floor(Math.random() * (1 << 24)).toString(16);
 };
@@ -99,6 +98,28 @@ describe('reverse populate', function() {
 				function(cb) { Post.remove({}, cb); },
 				function(cb) { Author.remove({}, cb); }
 			], done);
+		});
+
+		var required = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
+		required.forEach(function(fieldName) {
+			it('check mandatory field ' + fieldName, function(done) {
+				var msg = 'Missing mandatory field ';
+
+				var opts = {
+					modelArray: categories,
+					storeWhere: "posts",
+					arrayPop: true,
+					mongooseModel: Post,
+					idField: "categories"
+				};
+				delete opts[fieldName]
+
+				reversePopulate(opts, function(err, catResult) {
+					assert.notDeepEqual(err, null);
+					assert.equal(err.message, msg + fieldName);
+					done()
+				});
+			});
 		});
 
 		//populate categories with their associated posts when the relationship is stored on the post model

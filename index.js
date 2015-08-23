@@ -1,5 +1,5 @@
 var _ = require("lodash");
-var MANDATORY_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
+var REQUIRED_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
 /**
  * reversePopulate
@@ -23,14 +23,9 @@ var MANDATORY_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel",
 
 function reversePopulate(opts, cb) {
 
-	// Check all mandatory fields have been provided
-	MANDATORY_FIELDS.forEach(function(fieldName) {
-		var type = typeof opts[fieldName];
-		if (type === "undefined" || type === "null") {
-			var error = new Error("Missing mandatory field " + fieldName);
-			cb(error);
-		}
-	});
+	//check required fields have been provided
+	try { checkRequired(REQUIRED_FIELDS, opts) }
+	catch (ex) { return cb(ex) }
 
 	// If empty array passed, exit!
 	if (!opts.modelArray.length) return cb(null, opts.modelArray);
@@ -135,3 +130,13 @@ function getSelectString(selectStr, requiredId) {
 }
 
 module.exports = reversePopulate;
+
+function checkRequired(required, opts) {
+	// Check all mandatory fields have been provided
+	required.forEach(function(fieldName) {
+		var type = typeof opts[fieldName];
+		if (type === "undefined" || type === "null") {
+			throw new Error("Missing mandatory field " + fieldName);
+		}
+	});
+}
