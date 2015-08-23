@@ -112,12 +112,12 @@ describe('reverse populate', function() {
 					mongooseModel: Post,
 					idField: "categories"
 				};
-				delete opts[fieldName]
+				delete opts[fieldName];
 
 				reversePopulate(opts, function(err, catResult) {
 					assert.notDeepEqual(err, null);
 					assert.equal(err.message, msg + fieldName);
-					done()
+					done();
 				});
 			});
 		});
@@ -214,10 +214,10 @@ describe('reverse populate', function() {
 				author.posts.forEach(function(post) {
 					//expect these two to be populated
 					//author is automatically included as it's required to perform the populate
-					assert.notEqual(typeof post.author, "undefined")
-					assert.notEqual(typeof post.title, "undefined")
+					assert.notEqual(typeof post.author, "undefined");
+					assert.notEqual(typeof post.title, "undefined");
 					//expect this to be undefined
-					assert.equal(typeof post.catgegory, "undefined")
+					assert.equal(typeof post.catgegory, "undefined");
 				});
 
 				done();
@@ -282,7 +282,7 @@ describe('reverse populate', function() {
 
 				var author = authResult[0];
 				author.posts.forEach(function(post) {
-					assert.equal(post.categories.length, 2)
+					assert.equal(post.categories.length, 2);
 					idsMatch(post.categories, categories);
 				});
 				done();
