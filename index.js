@@ -11,7 +11,7 @@ function reversePopulate(opts, cb) {
 	if (!opts.modelArray.length) return cb(null, opts.modelArray);
 
 	// Transform the model array for easy lookups
-	var modelIndex = _.indexBy(opts.modelArray, "_id");
+	var modelIndex = _.indexBy(opts.modelArray, opts.indexField || "_id");
 
 	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
@@ -65,7 +65,7 @@ function checkRequired(required, opts) {
 // Build the query string with user provided options
 function buildQuery(opts) {
 	var conditions = opts.filters || {};
-	var ids = _.pluck(opts.modelArray, "_id");
+	var ids = _.pluck(opts.modelArray, opts.indexField || "_id");
 	conditions[opts.idField] = { $in: ids };
 
 	var query = opts.mongooseModel.find(conditions);
