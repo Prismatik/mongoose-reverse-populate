@@ -26,7 +26,7 @@ function reversePopulate(opts, cb) {
 		results.forEach(function(result) {
 
 			// Check if the ID field is an array
-			var isArray = !isNaN(result[opts.idField].length);
+			var isArray = result[opts.idField] instanceof Array;
 
 			// If the idField is an array, map through this
 			if (isArray) {
