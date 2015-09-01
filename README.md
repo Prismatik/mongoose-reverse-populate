@@ -23,7 +23,8 @@ Author.find().exec(function(err, authors) {
         storeWhere: "posts",
         arrayPop: true,
         mongooseModel: Post,
-        idField: "author"
+        idField: "author",
+        indexField: "customId"
     }
 
 
@@ -48,9 +49,10 @@ The options object should contain the following properties...
 * storeWhere (string) - where should the 'related models' be stored (which property i.e. "posts") within the 'models to populate' (those in the modelArray).
 * arrayPop - if the 'model to populate' has many 'related models' this should be set to true. This ensures the results of the reverse populate are stored as an array (e.g. an Author has many Posts). If the 'model to populate' can only have one 'related model' this should be set to false (e.g. a User has one Address).
 * mongooseModel (object) - the mongoose model object to use to find the 'related model' e.g. Post
-* idField (string) - the property of the 'related model' that contains the \_id of the 'model to populate' e.g. "author"
+* idField (string) - the property of the 'related model' that contains the \_id (or indexField, if supplied) of the 'model to populate' e.g. "author"
 
 **Optional properties**
+* indexField (string) - the property of the 'model to populate' to use as the index of the 'related model'. DEFAULT: \_id
 * filters (object) - this allows you to pass additional "criteria" to the mongoose query (.find) that fetches your 'related models'. For example you might wish to exclude models that have an active property set to false e.g. {active: {$ne: false}}. The syntax for filters is identical to that used with mongoose .find and is passed directly into the query. Note filters determines what to include and not what to exclude! See .find syntax [Query#find](http://mongoosejs.com/docs/api.html#query_Query-find)
 * select (object / string) - restrict which fields are returned for your 'related models', see [Query#select](http://mongoosejs.com/docs/api.html#query_Query-select)
 * populate (object / string) - populate your 'related models' with their related models, see [Query#populate](http://mongoosejs.com/docs/api.html#query_Query-populate)
