@@ -67,23 +67,37 @@ module.exports.reservePopulate = reversePopulate;
 module.exports.reversePopulateForJson = reversePopulateForJson;
 
 
+/**
+ * Add the provided field (simple or deep) to the results objects
+ * @param results {Array<Object>} as returned by mongoose, with additional field
+ * @param fields {string} additional field indicator
+ * @return {Array<Object>}
+ */
 function addPopulatedFieldToResults(results, fields) {
 	var res = [];
 	results.forEach(function(r) {
 
 		var pop = getDeep(r, fields);
 		if (pop) {
+			// prepare additional property
 			var popObj = {};
 			setDeep(popObj, fields, pop);
 
+			// prepare original object
+			var obj = r;
+			if (typeof r.toObject === 'function') obj = r.toObject();
+
+			// concatenate and add to returning array
 			res.push(
 				Object.assign(
 					{},
-					r.toObject(),
+					obj,
 					popObj
 				)
 			);
 		}
+		// sometimes some objects have no populated results as they were not matching the original query
+		// (eg. in 0..* relations). So we just add them as it to the returning array.
 		else {
 			res.push(r);
 		}
@@ -106,7 +120,7 @@ function setDeep(object, indicator, value) {
 	if (indicator.length === 1) {
 		object[indicator[0]] = value;
 	} else {
-		if (typeof object[indicator[0]] === 'undefined') {
+		if (typeof object[indicator[0]] !== 'object') {
 			object[indicator[0]] = {};
 		}
 		setDeep(object[indicator[0]], indicator.slice(1), value);
