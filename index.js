@@ -63,7 +63,7 @@ function reversePopulateForJson(opts, callback) {
 	});
 }
 
-module.exports.reservePopulate = reversePopulate;
+module.exports.reversePopulate = reversePopulate;
 module.exports.reversePopulateForJson = reversePopulateForJson;
 
 
