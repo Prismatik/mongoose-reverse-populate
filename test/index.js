@@ -1,4 +1,4 @@
-var reversePopulate = require('../index.js');
+var reversePopulate = require('../index.js').reversePopulate;
 
 var assert = require('assert');
 var async = require('async');
