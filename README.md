@@ -16,7 +16,7 @@ var reversePopulate = require('mongoose-reverse-populate');
 
 //the next step requires access to the 'Author' and 'Post' mongoose model
 
-Author.find().exec(function(err, authors) {
+Author.find().lean().exec(function(err, authors) {
 
     var opts = {
         modelArray: authors,
