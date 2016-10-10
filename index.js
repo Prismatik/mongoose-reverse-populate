@@ -15,6 +15,18 @@ function reversePopulate(opts, cb) {
 
 	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
+	// Default: Add no null (or an empty array) to objects that are reverse populated.
+
+	if (opts.addEmptyObject) {
+		opts.modelArray.forEach(function (element) {
+			if (opts.arrayPop) {
+				element[opts.storeWhere] = [];
+			} else {
+				element[opts.storeWhere] = null;
+			}
+		});
+	}
+
 	var query = buildQuery(opts);
 
 	// Do the query
