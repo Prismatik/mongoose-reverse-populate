@@ -1,4 +1,5 @@
 var keyBy = require("lodash/keyBy")
+var isArray = require("lodash/isArray")
 var REQUIRED_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
 function reversePopulate(opts, cb) {
@@ -25,11 +26,8 @@ function reversePopulate(opts, cb) {
 		// Map over results (models to be populated)
 		results.forEach(function(result) {
 
-			// Check if the ID field is an array
-			var isArray = !isNaN(result[opts.idField].length);
-
 			// If the idField is an array, map through this
-			if (isArray) {
+			if (isArray(result[opts.idField])) {
 				result[opts.idField].map(function(resultId) {
 					var match = modelIndex[resultId];
 					// If match found, populate the result inside the match
