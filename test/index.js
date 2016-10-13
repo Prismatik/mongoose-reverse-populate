@@ -2,7 +2,7 @@ var reversePopulate = require('../index.js');
 
 var assert = require('assert');
 var async = require('async');
-var _ = require('lodash');
+var difference = require('lodash/difference');
 var mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost/mongoose-reverse-populate-test');
@@ -78,7 +78,7 @@ describe('reverse populate', function() {
 							});
 							posts.push(newPost);
 						}
-						
+
 						//save all posts
 						async.each(posts, function(post, cb) {
 							post.save(cb);
@@ -91,7 +91,7 @@ describe('reverse populate', function() {
 
 			});
 		});
-		
+
 		afterEach(function(done) {
 			async.parallel([
 				function(cb) { Category.remove({}, cb); },
@@ -225,7 +225,7 @@ describe('reverse populate', function() {
 		});
 
 		it('should \"sort\" the results returned', function(done) {
-			var sortedTitles = _.pluck(posts, "title").sort();
+			var sortedTitles = posts.map(function(item) { return item.title }).sort();
 
 			var opts = {
 				modelArray: authors,
@@ -240,7 +240,7 @@ describe('reverse populate', function() {
 				var author = authResult[0];
 
 				assert.equal(author.posts.length, 5);
-				var postTitles =  _.pluck(author.posts, "title");
+        var postTitles =  author.posts.map(function(item) { return item.title });
 				assert.deepEqual(sortedTitles, postTitles);
 
 				done();
@@ -377,8 +377,8 @@ var idsMatch = function(arr1, arr2) {
 
 	var arr1IDs = pluckIds(arr1);
 	var arr2IDs = pluckIds(arr2);
-	
-	var diff = _.difference(arr1IDs, arr2IDs);
+
+	var diff = difference(arr1IDs, arr2IDs);
 	assert.equal(diff.length, 0);
 };
 

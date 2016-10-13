@@ -1,4 +1,4 @@
-var _ = require("lodash");
+var keyBy = require("lodash/keyBy")
 var REQUIRED_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
 function reversePopulate(opts, cb) {
@@ -11,7 +11,7 @@ function reversePopulate(opts, cb) {
 	if (!opts.modelArray.length) return cb(null, opts.modelArray);
 
 	// Transform the model array for easy lookups
-	var modelIndex = _.indexBy(opts.modelArray, "_id");
+	var modelIndex = keyBy(opts.modelArray, "_id");
 
 	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
@@ -65,7 +65,7 @@ function checkRequired(required, opts) {
 // Build the query string with user provided options
 function buildQuery(opts) {
 	var conditions = opts.filters || {};
-	var ids = _.pluck(opts.modelArray, "_id");
+	var ids = opts.modelArray.map(function (item) { return item._id });
 	conditions[opts.idField] = { $in: ids };
 
 	var query = opts.mongooseModel.find(conditions);
@@ -103,4 +103,3 @@ function populateResult(storeWhere, arrayPop, match, result) {
 		match[storeWhere] = result;
 	}
 }
-
