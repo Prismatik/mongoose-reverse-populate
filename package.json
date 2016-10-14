@@ -1,6 +1,6 @@
 {
   "name": "mongoose-reverse-populate",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "This module allows you to 'populate' a mongoose model where the relationship ids are stored on another mongoose model that is related to this model",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "mocha": "^2.2.1"
   },
   "dependencies": {
-    "lodash": "^3.10.0"
+    "lodash": "^4.0.0"
   },
   "engines": {
     "node": ">= 0.10.0"

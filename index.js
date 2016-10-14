@@ -1,4 +1,5 @@
-var _ = require("lodash");
+var keyBy = require("lodash/keyBy")
+var isArray = require("lodash/isArray")
 var REQUIRED_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
 function reversePopulate(opts, cb) {
@@ -11,7 +12,7 @@ function reversePopulate(opts, cb) {
 	if (!opts.modelArray.length) return cb(null, opts.modelArray);
 
 	// Transform the model array for easy lookups
-	var modelIndex = _.indexBy(opts.modelArray, "_id");
+	var modelIndex = keyBy(opts.modelArray, "_id");
 
 	var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
@@ -25,11 +26,8 @@ function reversePopulate(opts, cb) {
 		// Map over results (models to be populated)
 		results.forEach(function(result) {
 
-			// Check if the ID field is an array
-			var isArray = !isNaN(result[opts.idField].length);
-
 			// If the idField is an array, map through this
-			if (isArray) {
+			if (isArray(result[opts.idField])) {
 				result[opts.idField].map(function(resultId) {
 					var match = modelIndex[resultId];
 					// If match found, populate the result inside the match
@@ -65,7 +63,7 @@ function checkRequired(required, opts) {
 // Build the query string with user provided options
 function buildQuery(opts) {
 	var conditions = opts.filters || {};
-	var ids = _.pluck(opts.modelArray, "_id");
+	var ids = opts.modelArray.map(function (item) { return item._id });
 	conditions[opts.idField] = { $in: ids };
 
 	var query = opts.mongooseModel.find(conditions);
@@ -103,4 +101,3 @@ function populateResult(storeWhere, arrayPop, match, result) {
 		match[storeWhere] = result;
 	}
 }
-
