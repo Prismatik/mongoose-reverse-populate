@@ -1,7 +1,7 @@
 var _ = require("lodash");
 var REQUIRED_FIELDS = ["modelArray", "storeWhere", "arrayPop", "mongooseModel", "idField"];
 
-function reversePopulate(opts, cb) {
+async function reversePopulate(opts, cb) {
 
 	// Check required fields have been provided
 	try { checkRequired(REQUIRED_FIELDS, opts); }
@@ -18,9 +18,8 @@ function reversePopulate(opts, cb) {
 	var query = buildQuery(opts);
 
 	// Do the query
-	query.exec(function(err, results) {
-		// If there is an error, callback with error
-		if (err) return cb(err);
+	try {
+		const results = await query();
 
 		// Map over results (models to be populated)
 		results.forEach(function(result) {
@@ -49,7 +48,9 @@ function reversePopulate(opts, cb) {
 
 		// Callback with passed modelArray
 		cb(null, opts.modelArray);
-	});
+	} catch (err) {
+		cb(err);
+	}
 }
 
 module.exports = reversePopulate;
