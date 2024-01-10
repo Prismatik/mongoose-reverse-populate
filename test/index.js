@@ -88,7 +88,7 @@ describe("reverse populate", () => {
       "idField",
     ];
     required.forEach((fieldName) => {
-      it(`check mandatory field ${fieldName}`, (done) => {
+      it(`check mandatory field ${fieldName}`, async () => {
         const msg = "Missing mandatory field ";
 
         const opts = {
@@ -100,16 +100,17 @@ describe("reverse populate", () => {
         };
         delete opts[fieldName];
 
-        reversePopulate(opts, (err, catResult) => {
+        try {
+          await reversePopulate(opts);
+        } catch (err) {
           assert.notDeepEqual(err, null);
           assert.equal(err.message, msg + fieldName);
-          done();
-        });
+        }
       });
     });
 
     //populate categories with their associated posts when the relationship is stored on the post model
-    it("should successfully reverse populate a many-to-many relationship", (done) => {
+    it("should successfully reverse populate a many-to-many relationship", async () => {
       const opts = {
         modelArray: categories,
         storeWhere: "posts",
@@ -117,23 +118,21 @@ describe("reverse populate", () => {
         mongooseModel: Post,
         idField: "categories",
       };
-      reversePopulate(opts, (err, catResult) => {
-        //expect catResult and categories to be the same
-        assert.equal(catResult.length, 2);
-        idsMatch(catResult, categories);
 
-        //expect each catResult to contain the posts
-        catResult.forEach((category) => {
-          assert.equal(category.posts.length, 5);
-          idsMatch(category.posts, posts);
-        });
+      const catResult = await reversePopulate(opts);
+      //expect catResult and categories to be the same
+      assert.equal(catResult.length, 2);
+      idsMatch(catResult, categories);
 
-        done();
+      //expect each catResult to contain the posts
+      catResult.forEach((category) => {
+        assert.equal(category.posts.length, 5);
+        idsMatch(category.posts, posts);
       });
     });
 
     //populate authors with their associated posts when the relationship is stored on the post model
-    it("should successfully reverse populate a one-to-many relationship", (done) => {
+    it("should successfully reverse populate a one-to-many relationship", async () => {
       const opts = {
         modelArray: authors,
         storeWhere: "posts",
@@ -141,22 +140,20 @@ describe("reverse populate", () => {
         mongooseModel: Post,
         idField: "author",
       };
-      reversePopulate(opts, (err, authResult) => {
-        //expect catResult and categories to be the same
-        assert.equal(authResult.length, 1);
-        idsMatch(authResult, authors);
+      const authResult = await reversePopulate(opts);
+      //expect catResult and categories to be the same
+      assert.equal(authResult.length, 1);
+      idsMatch(authResult, authors);
 
-        //expect each catResult to contain the posts
-        authResult.forEach((author) => {
-          idsMatch(author.posts, posts);
-          assert.equal(author.posts.length, 5);
-        });
-        done();
+      //expect each catResult to contain the posts
+      authResult.forEach((author) => {
+        idsMatch(author.posts, posts);
+        assert.equal(author.posts.length, 5);
       });
     });
 
     //test to ensure filtering results works as expected
-    it('should "filter" the query results', (done) => {
+    it('should "filter" the query results', async () => {
       //pick a random post to be filtered (the first one)
       const firstPost = posts[0];
 
@@ -168,22 +165,19 @@ describe("reverse populate", () => {
         idField: "author",
         filters: { title: { $ne: firstPost.title } },
       };
-      reversePopulate(opts, (_err, authResult) => {
-        assert.equal(authResult.length, 1);
-        const author = authResult[0];
+      const authResult = await reversePopulate(opts);
+      assert.equal(authResult.length, 1);
+      const author = authResult[0];
 
-        //the authors posts should exclude the title passed as a filter
-        //there are 10 posts for this author and 1 title is excluded so expect 9
-        assert.equal(author.posts.length, 4);
-        author.posts.forEach((post) => {
-          assert.notEqual(firstPost.title, post.title);
-        });
-
-        done();
+      //the authors posts should exclude the title passed as a filter
+      //there are 10 posts for this author and 1 title is excluded so expect 9
+      assert.equal(author.posts.length, 4);
+      author.posts.forEach((post) => {
+        assert.notEqual(firstPost.title, post.title);
       });
     });
 
-    it('should "select" only the desired fields', (done) => {
+    it('should "select" only the desired fields', async () => {
       const opts = {
         modelArray: authors,
         storeWhere: "posts",
@@ -192,25 +186,22 @@ describe("reverse populate", () => {
         idField: "author",
         select: "title",
       };
-      reversePopulate(opts, (err, authResult) => {
-        assert.equal(authResult.length, 1);
-        const author = authResult[0];
+      const authResult = await reversePopulate(opts);
+      assert.equal(authResult.length, 1);
+      const author = authResult[0];
 
-        assert.equal(author.posts.length, 5);
-        author.posts.forEach((post) => {
-          //expect these two to be populated
-          //author is automatically included as it's required to perform the populate
-          assert.notEqual(typeof post.author, "undefined");
-          assert.notEqual(typeof post.title, "undefined");
-          //expect this to be undefined
-          assert.equal(typeof post.catgegory, "undefined");
-        });
-
-        done();
+      assert.equal(author.posts.length, 5);
+      author.posts.forEach((post) => {
+        //expect these two to be populated
+        //author is automatically included as it's required to perform the populate
+        assert.notEqual(typeof post.author, "undefined");
+        assert.notEqual(typeof post.title, "undefined");
+        //expect this to be undefined
+        assert.equal(typeof post.catgegory, "undefined");
       });
     });
 
-    it('should "sort" the results returned', (done) => {
+    it('should "sort" the results returned', async () => {
       const sortedTitles = _.pluck(posts, "title").sort();
 
       const opts = {
@@ -221,21 +212,18 @@ describe("reverse populate", () => {
         idField: "author",
         sort: "title",
       };
-      reversePopulate(opts, (_err, authResult) => {
-        assert.equal(authResult.length, 1);
-        const author = authResult[0];
+      const authResult = await reversePopulate(opts);
+      assert.equal(authResult.length, 1);
+      const author = authResult[0];
 
-        assert.equal(author.posts.length, 5);
-        const postTitles = _.pluck(author.posts, "title");
-        assert.deepEqual(sortedTitles, postTitles);
-
-        done();
-      });
+      assert.equal(author.posts.length, 5);
+      const postTitles = _.pluck(author.posts, "title");
+      assert.deepEqual(sortedTitles, postTitles);
     });
 
     //use reverse populate to populate posts within author
     //use standard populate to nest categories in posts
-    it('should "populate" the results returned', (done) => {
+    it('should "populate" the results returned', async () => {
       const opts = {
         modelArray: authors,
         storeWhere: "posts",
@@ -244,16 +232,14 @@ describe("reverse populate", () => {
         idField: "author",
         populate: "categories",
       };
-      reversePopulate(opts, (_err, authResult) => {
-        assert.equal(authResult.length, 1);
-        idsMatch(authResult, authors);
+      const authResult = await reversePopulate(opts);
+      assert.equal(authResult.length, 1);
+      idsMatch(authResult, authors);
 
-        const author = authResult[0];
-        author.posts.forEach((post) => {
-          assert.equal(post.categories.length, 2);
-          idsMatch(post.categories, categories);
-        });
-        done();
+      const author = authResult[0];
+      author.posts.forEach((post) => {
+        assert.equal(post.categories.length, 2);
+        idsMatch(post.categories, categories);
       });
     });
   });
@@ -330,16 +316,15 @@ describe("reverse populate", () => {
         idField: "owner",
       };
       //as this is one-to-one result should not be populated inside an array
-      reversePopulate(opts, (_err, personsResult) => {
-        personsResult.forEach((person) => {
-          //if this is person1, check against passport1
-          if (person._id.equals(person1._id)) {
-            idMatch(person.passport, passport1);
-            //if this is person2, check against passport2
-          } else {
-            idMatch(person.passport, passport2);
-          }
-        });
+      const personsResult = await reversePopulate(opts);
+      personsResult.forEach((person) => {
+        //if this is person1, check against passport1
+        if (person._id.equals(person1._id)) {
+          idMatch(person.passport, passport1);
+          //if this is person2, check against passport2
+        } else {
+          idMatch(person.passport, passport2);
+        }
       });
     });
   });

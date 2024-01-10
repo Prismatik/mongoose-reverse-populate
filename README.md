@@ -25,18 +25,17 @@ Author.find().exec(function(err, authors) {
     }
 
 
-	reversePopulate(opts, function(err, popAuthors) {
-		//popAuthors will be populated with posts under .posts property
-	});
+	const popAuthors = await reversePopulate(opts);
+    // popAuthors will be populated with posts under .posts property
 });
 
 ```
 
 ## Inputs
 
-The function expects an opts object (options) and callback to be passed into it
+The function expects an opts object (options)
 
-function(opts, callback) {...}
+function(opts) {...}
 
 #### opts
 
@@ -56,10 +55,6 @@ The options object should contain the following properties...
 - select (object / string) - restrict which fields are returned for your 'related models', see [Query#select](http://mongoosejs.com/docs/api.html#query_Query-select)
 - populate (object / string) - populate your 'related models' with their related models, see [Query#populate](http://mongoosejs.com/docs/api.html#query_Query-populate)
 - sort (object / string) - sort your 'related models', see [Query#sort](http://mongoosejs.com/docs/api.html#query_Query-sort)
-
-#### callback
-
-The callback function will be run once the objects are populated and will receive the populated modelArray as the success parameter of the function.
 
 ## Why is this needed?
 

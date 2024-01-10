@@ -8,16 +8,14 @@ const REQUIRED_FIELDS = [
   "idField",
 ];
 
-async function reversePopulate(opts, cb) {
+async function reversePopulate(opts) {
   // Check required fields have been provided
-  try {
-    checkRequired(REQUIRED_FIELDS, opts);
-  } catch (ex) {
-    return cb(ex);
-  }
+  checkRequired(REQUIRED_FIELDS, opts);
 
   // If empty array passed, exit!
-  if (!opts.modelArray.length) return cb(null, opts.modelArray);
+  if (!opts.modelArray.length) {
+    return opts.modelArray;
+  }
 
   // Transform the model array for easy lookups
   const modelIndex = _.indexBy(opts.modelArray, "_id");
@@ -27,38 +25,34 @@ async function reversePopulate(opts, cb) {
   const query = buildQuery(opts);
 
   // Do the query
-  try {
-    const results = await query.exec();
+  const results = await query.exec();
 
-    // Map over results (models to be populated)
-    results.forEach((result) => {
-      // Check if the ID field is an array
-      const isArray = Array.isArray(result[opts.idField]);
+  // Map over results (models to be populated)
+  results.forEach((result) => {
+    // Check if the ID field is an array
+    const isArray = Array.isArray(result[opts.idField]);
 
-      // If the idField is an array, map through this
-      if (isArray) {
-        result[opts.idField].forEach((resultId) => {
-          const match = modelIndex[resultId];
-          // If match found, populate the result inside the match
-          if (match) popResult(match, result);
-        });
-
-        // Id field is not an array
-      } else {
-        // So just add the result to the model
-        const matchId = result[opts.idField];
-        const match = modelIndex[matchId];
-
+    // If the idField is an array, map through this
+    if (isArray) {
+      result[opts.idField].forEach((resultId) => {
+        const match = modelIndex[resultId];
         // If match found, populate the result inside the match
         if (match) popResult(match, result);
-      }
-    });
+      });
 
-    // Callback with passed modelArray
-    cb(null, opts.modelArray);
-  } catch (err) {
-    cb(err);
-  }
+      // Id field is not an array
+    } else {
+      // So just add the result to the model
+      const matchId = result[opts.idField];
+      const match = modelIndex[matchId];
+
+      // If match found, populate the result inside the match
+      if (match) popResult(match, result);
+    }
+  });
+
+  // Callback with passed modelArray
+  return opts.modelArray;
 }
 
 module.exports = reversePopulate;
