@@ -1,32 +1,32 @@
-var reversePopulate = require("../index.js");
+const reversePopulate = require("../index.js");
 
-var assert = require("assert");
-var _ = require("lodash");
-var mongoose = require("mongoose");
+const assert = require("assert");
+const _ = require("lodash");
+const mongoose = require("mongoose");
 
 mongoose.connect("mongodb://localhost/mongoose-reverse-populate-test");
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-var rando = function () {
+const rando = () => {
   return Math.floor(Math.random() * (1 << 24)).toString(16);
 };
 
-describe("reverse populate", function () {
-  describe("multiple results", function () {
-    var Category, Post, Author;
-    var categories, posts, authors;
+describe("reverse populate", () => {
+  describe("multiple results", () => {
+    let Category, Post, Author;
+    let categories, posts, authors;
 
     //define schemas and models for tests
-    before(function (done) {
+    before(async () => {
       //a category has many posts
-      var categorySchema = new Schema({
+      const categorySchema = new Schema({
         name: String,
       });
       Category = mongoose.model("Category", categorySchema);
 
       //a post can have many categories
       //a post can ONLY have one author
-      var postSchema = new Schema({
+      const postSchema = new Schema({
         title: String,
         categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
         author: { type: Schema.Types.ObjectId, ref: "Author" },
@@ -35,21 +35,19 @@ describe("reverse populate", function () {
       Post = mongoose.model("Post", postSchema);
 
       //an author has many posts
-      var authorSchema = new Schema({
+      const authorSchema = new Schema({
         firstName: String,
         lastName: String,
       });
       Author = mongoose.model("Author", authorSchema);
-      done();
     });
 
     //create 2 x categories, 1 x author and 10 x posts
-    beforeEach(async function (done) {
+    beforeEach(async () => {
       const category = await Category.create({
         name: rando(),
       });
-      categories = [];
-      categories.push(category);
+      categories = [category];
 
       const category2 = await Category.create({
         name: rando(),
@@ -60,13 +58,12 @@ describe("reverse populate", function () {
         firstName: rando(),
         lastName: rando(),
       });
-      authors = [];
-      authors.push(author);
+      authors = [author];
 
       //create multi category posts
       posts = [];
-      for (i = 0; i < 5; i++) {
-        newPost = new Post({
+      for (let i = 0; i < 5; i++) {
+        const newPost = new Post({
           title: rando(),
           categories: categories,
           author: author,
@@ -75,29 +72,26 @@ describe("reverse populate", function () {
         posts.push(newPost);
         await newPost.save();
       }
-
-      done();
     });
 
-    afterEach(async function (done) {
+    afterEach(async () => {
       await Category.deleteMany({});
       await Post.deleteMany({});
       await Author.deleteMany({});
-      done();
     });
 
-    var required = [
+    const required = [
       "modelArray",
       "storeWhere",
       "arrayPop",
       "mongooseModel",
       "idField",
     ];
-    required.forEach(function (fieldName) {
-      it("check mandatory field " + fieldName, function (done) {
-        var msg = "Missing mandatory field ";
+    required.forEach((fieldName) => {
+      it(`check mandatory field ${fieldName}`, (done) => {
+        const msg = "Missing mandatory field ";
 
-        var opts = {
+        const opts = {
           modelArray: categories,
           storeWhere: "posts",
           arrayPop: true,
@@ -106,7 +100,7 @@ describe("reverse populate", function () {
         };
         delete opts[fieldName];
 
-        reversePopulate(opts, function (err, catResult) {
+        reversePopulate(opts, (err, catResult) => {
           assert.notDeepEqual(err, null);
           assert.equal(err.message, msg + fieldName);
           done();
@@ -115,21 +109,21 @@ describe("reverse populate", function () {
     });
 
     //populate categories with their associated posts when the relationship is stored on the post model
-    it("should successfully reverse populate a many-to-many relationship", function (done) {
-      var opts = {
+    it("should successfully reverse populate a many-to-many relationship", (done) => {
+      const opts = {
         modelArray: categories,
         storeWhere: "posts",
         arrayPop: true,
         mongooseModel: Post,
         idField: "categories",
       };
-      reversePopulate(opts, function (err, catResult) {
+      reversePopulate(opts, (err, catResult) => {
         //expect catResult and categories to be the same
         assert.equal(catResult.length, 2);
         idsMatch(catResult, categories);
 
         //expect each catResult to contain the posts
-        catResult.forEach(function (category) {
+        catResult.forEach((category) => {
           assert.equal(category.posts.length, 5);
           idsMatch(category.posts, posts);
         });
@@ -139,21 +133,21 @@ describe("reverse populate", function () {
     });
 
     //populate authors with their associated posts when the relationship is stored on the post model
-    it("should successfully reverse populate a one-to-many relationship", function (done) {
-      var opts = {
+    it("should successfully reverse populate a one-to-many relationship", (done) => {
+      const opts = {
         modelArray: authors,
         storeWhere: "posts",
         arrayPop: true,
         mongooseModel: Post,
         idField: "author",
       };
-      reversePopulate(opts, function (err, authResult) {
+      reversePopulate(opts, (err, authResult) => {
         //expect catResult and categories to be the same
         assert.equal(authResult.length, 1);
         idsMatch(authResult, authors);
 
         //expect each catResult to contain the posts
-        authResult.forEach(function (author) {
+        authResult.forEach((author) => {
           idsMatch(author.posts, posts);
           assert.equal(author.posts.length, 5);
         });
@@ -162,11 +156,11 @@ describe("reverse populate", function () {
     });
 
     //test to ensure filtering results works as expected
-    it('should "filter" the query results', function (done) {
+    it('should "filter" the query results', (done) => {
       //pick a random post to be filtered (the first one)
-      var firstPost = posts[0];
+      const firstPost = posts[0];
 
-      var opts = {
+      const opts = {
         modelArray: authors,
         storeWhere: "posts",
         arrayPop: true,
@@ -174,14 +168,14 @@ describe("reverse populate", function () {
         idField: "author",
         filters: { title: { $ne: firstPost.title } },
       };
-      reversePopulate(opts, function (_err, authResult) {
+      reversePopulate(opts, (_err, authResult) => {
         assert.equal(authResult.length, 1);
-        var author = authResult[0];
+        const author = authResult[0];
 
         //the authors posts should exclude the title passed as a filter
         //there are 10 posts for this author and 1 title is excluded so expect 9
         assert.equal(author.posts.length, 4);
-        author.posts.forEach(function (post) {
+        author.posts.forEach((post) => {
           assert.notEqual(firstPost.title, post.title);
         });
 
@@ -189,8 +183,8 @@ describe("reverse populate", function () {
       });
     });
 
-    it('should "select" only the desired fields', function (done) {
-      var opts = {
+    it('should "select" only the desired fields', (done) => {
+      const opts = {
         modelArray: authors,
         storeWhere: "posts",
         arrayPop: true,
@@ -198,12 +192,12 @@ describe("reverse populate", function () {
         idField: "author",
         select: "title",
       };
-      reversePopulate(opts, function (err, authResult) {
+      reversePopulate(opts, (err, authResult) => {
         assert.equal(authResult.length, 1);
-        var author = authResult[0];
+        const author = authResult[0];
 
         assert.equal(author.posts.length, 5);
-        author.posts.forEach(function (post) {
+        author.posts.forEach((post) => {
           //expect these two to be populated
           //author is automatically included as it's required to perform the populate
           assert.notEqual(typeof post.author, "undefined");
@@ -216,10 +210,10 @@ describe("reverse populate", function () {
       });
     });
 
-    it('should "sort" the results returned', function (done) {
-      var sortedTitles = _.pluck(posts, "title").sort();
+    it('should "sort" the results returned', (done) => {
+      const sortedTitles = _.pluck(posts, "title").sort();
 
-      var opts = {
+      const opts = {
         modelArray: authors,
         storeWhere: "posts",
         arrayPop: true,
@@ -227,12 +221,12 @@ describe("reverse populate", function () {
         idField: "author",
         sort: "title",
       };
-      reversePopulate(opts, function (_err, authResult) {
+      reversePopulate(opts, (_err, authResult) => {
         assert.equal(authResult.length, 1);
-        var author = authResult[0];
+        const author = authResult[0];
 
         assert.equal(author.posts.length, 5);
-        var postTitles = _.pluck(author.posts, "title");
+        const postTitles = _.pluck(author.posts, "title");
         assert.deepEqual(sortedTitles, postTitles);
 
         done();
@@ -241,8 +235,8 @@ describe("reverse populate", function () {
 
     //use reverse populate to populate posts within author
     //use standard populate to nest categories in posts
-    it('should "populate" the results returned', function (done) {
-      var opts = {
+    it('should "populate" the results returned', (done) => {
+      const opts = {
         modelArray: authors,
         storeWhere: "posts",
         arrayPop: true,
@@ -250,12 +244,12 @@ describe("reverse populate", function () {
         idField: "author",
         populate: "categories",
       };
-      reversePopulate(opts, function (_err, authResult) {
+      reversePopulate(opts, (_err, authResult) => {
         assert.equal(authResult.length, 1);
         idsMatch(authResult, authors);
 
-        var author = authResult[0];
-        author.posts.forEach(function (post) {
+        const author = authResult[0];
+        author.posts.forEach((post) => {
           assert.equal(post.categories.length, 2);
           idsMatch(post.categories, categories);
         });
@@ -264,14 +258,14 @@ describe("reverse populate", function () {
     });
   });
 
-  describe("singular results", function () {
-    var Person, Passport;
-    var person1, person2, passport1, passport2;
+  describe("singular results", () => {
+    let Person, Passport;
+    let person1, person2, passport1, passport2;
 
     //define schemas and models for tests
-    before(function (done) {
+    before(async () => {
       //a person has one passport
-      var personSchema = new Schema({
+      const personSchema = new Schema({
         firstName: String,
         lastName: String,
         dob: Date,
@@ -279,17 +273,16 @@ describe("reverse populate", function () {
       Person = mongoose.model("Person", personSchema);
 
       //a passport has one owner (person)
-      var passportSchema = new Schema({
+      const passportSchema = new Schema({
         number: String,
         expiry: Date,
         owner: { type: Schema.Types.ObjectId, ref: "Person" },
       });
       Passport = mongoose.model("Passport", passportSchema);
-      done();
     });
 
     //create 2 x people, 2 x passports
-    beforeEach(async function (done) {
+    beforeEach(async () => {
       const person = await Person.create({
         firstName: rando(),
         lastName: rando(),
@@ -320,18 +313,16 @@ describe("reverse populate", function () {
         owner: secondPerson,
       });
       passport2 = secondPassport;
-      done();
     });
 
-    afterEach(async function (done) {
+    afterEach(async () => {
       await Person.deleteMany({});
       await Passport.deleteMany({});
-      done();
     });
 
-    it("should successfully reverse populate a one-to-one relationship", async function (done) {
+    it("should successfully reverse populate a one-to-one relationship", async () => {
       const persons = await Person.find({});
-      var opts = {
+      const opts = {
         modelArray: persons,
         storeWhere: "passport",
         arrayPop: false,
@@ -339,8 +330,8 @@ describe("reverse populate", function () {
         idField: "owner",
       };
       //as this is one-to-one result should not be populated inside an array
-      reversePopulate(opts, function (_err, personsResult) {
-        personsResult.forEach(function (person) {
+      reversePopulate(opts, (_err, personsResult) => {
+        personsResult.forEach((person) => {
           //if this is person1, check against passport1
           if (person._id.equals(person1._id)) {
             idMatch(person.passport, passport1);
@@ -349,7 +340,6 @@ describe("reverse populate", function () {
             idMatch(person.passport, passport2);
           }
         });
-        done();
       });
     });
   });
@@ -360,24 +350,24 @@ describe("reverse populate", function () {
  */
 
 //compare an array of mongoose objects
-var idsMatch = function (arr1, arr2) {
+const idsMatch = (arr1, arr2) => {
   assert.equal(arr1.length, arr2.length);
 
-  var arr1IDs = pluckIds(arr1);
-  var arr2IDs = pluckIds(arr2);
+  const arr1IDs = pluckIds(arr1);
+  const arr2IDs = pluckIds(arr2);
 
-  var diff = _.difference(arr1IDs, arr2IDs);
+  const diff = _.difference(arr1IDs, arr2IDs);
   assert.equal(diff.length, 0);
 };
 
-var pluckIds = function (array) {
-  return array.map(function (obj) {
+const pluckIds = (array) => {
+  return array.map((obj) => {
     return obj._id.toString();
   });
 };
 
 //compare two mongoose objects using _id
-var idMatch = function (obj1, obj2) {
-  var compare = obj1._id.equals(obj2._id);
+const idMatch = (obj1, obj2) => {
+  const compare = obj1._id.equals(obj2._id);
   assert(compare);
 };
