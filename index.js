@@ -1,5 +1,6 @@
-var _ = require("lodash");
-var REQUIRED_FIELDS = [
+const _ = require("lodash");
+
+const REQUIRED_FIELDS = [
   "modelArray",
   "storeWhere",
   "arrayPop",
@@ -19,25 +20,25 @@ async function reversePopulate(opts, cb) {
   if (!opts.modelArray.length) return cb(null, opts.modelArray);
 
   // Transform the model array for easy lookups
-  var modelIndex = _.indexBy(opts.modelArray, "_id");
+  const modelIndex = _.indexBy(opts.modelArray, "_id");
 
-  var popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
+  const popResult = populateResult.bind(this, opts.storeWhere, opts.arrayPop);
 
-  var query = buildQuery(opts);
+  const query = buildQuery(opts);
 
   // Do the query
   try {
     const results = await query.exec();
 
     // Map over results (models to be populated)
-    results.forEach(function (result) {
+    results.forEach((result) => {
       // Check if the ID field is an array
-      var isArray = !isNaN(result[opts.idField].length);
+      const isArray = Array.isArray(result[opts.idField]);
 
       // If the idField is an array, map through this
       if (isArray) {
-        result[opts.idField].map(function (resultId) {
-          var match = modelIndex[resultId];
+        result[opts.idField].forEach((resultId) => {
+          const match = modelIndex[resultId];
           // If match found, populate the result inside the match
           if (match) popResult(match, result);
         });
@@ -45,8 +46,8 @@ async function reversePopulate(opts, cb) {
         // Id field is not an array
       } else {
         // So just add the result to the model
-        var matchId = result[opts.idField];
-        var match = modelIndex[matchId];
+        const matchId = result[opts.idField];
+        const match = modelIndex[matchId];
 
         // If match found, populate the result inside the match
         if (match) popResult(match, result);
@@ -64,23 +65,23 @@ module.exports = reversePopulate;
 
 // Check all mandatory fields have been provided
 function checkRequired(required, opts) {
-  var msg = "Missing mandatory field ";
-  required.forEach(function (fieldName) {
+  const msg = "Missing mandatory field ";
+  required.forEach((fieldName) => {
     if (opts[fieldName] == null) throw new Error(msg + fieldName);
   });
 }
 
 // Build the query string with user provided options
 function buildQuery(opts) {
-  var conditions = opts.filters || {};
-  var ids = _.pluck(opts.modelArray, "_id");
+  const conditions = opts.filters || {};
+  const ids = _.pluck(opts.modelArray, "_id");
   conditions[opts.idField] = { $in: ids };
 
-  var query = opts.mongooseModel.find(conditions);
+  let query = opts.mongooseModel.find(conditions);
 
   // Set query select() parameter
   if (opts.select) {
-    var select = getSelectString(opts.select, opts.idField);
+    const select = getSelectString(opts.select, opts.idField);
     query = query.select(select);
   }
 
@@ -91,8 +92,8 @@ function buildQuery(opts) {
 
 // Ensure the select option always includes the required id field to populate the relationship
 function getSelectString(selectStr, requiredId) {
-  var selected = selectStr.split(" ");
-  var idIncluded = !!~selected.indexOf(requiredId);
+  const selected = selectStr.split(" ");
+  const idIncluded = selected.includes(requiredId);
   if (!idIncluded) return selectStr + " " + requiredId;
   return selectStr;
 }
