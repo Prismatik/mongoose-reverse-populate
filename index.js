@@ -27,7 +27,7 @@ async function reversePopulate(opts, cb) {
 
   // Do the query
   try {
-    const results = await query();
+    const results = await query.exec();
 
     // Map over results (models to be populated)
     results.forEach(function (result) {
