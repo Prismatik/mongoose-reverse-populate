@@ -1,7 +1,6 @@
 var reversePopulate = require("../index.js");
 
 var assert = require("assert");
-var async = require("async");
 var _ = require("lodash");
 var mongoose = require("mongoose");
 
@@ -45,79 +44,46 @@ describe("reverse populate", function () {
     });
 
     //create 2 x categories, 1 x author and 10 x posts
-    beforeEach(function (done) {
-      Category.create(
-        {
-          name: rando(),
-        },
-        function (err, category) {
-          assert.deepEqual(err, null);
-          categories = [];
-          categories.push(category);
+    beforeEach(async function (done) {
+      const category = await Category.create({
+        name: rando(),
+      });
+      categories = [];
+      categories.push(category);
 
-          Category.create(
-            {
-              name: rando(),
-            },
-            function (err, category) {
-              assert.deepEqual(err, null);
-              categories.push(category);
+      const category2 = await Category.create({
+        name: rando(),
+      });
+      categories.push(category2);
 
-              Author.create(
-                {
-                  firstName: rando(),
-                  lastName: rando(),
-                },
-                function (err, author) {
-                  assert.deepEqual(err, null);
-                  authors = [];
-                  authors.push(author);
+      const author = await Author.create({
+        firstName: rando(),
+        lastName: rando(),
+      });
+      authors = [];
+      authors.push(author);
 
-                  //create multi category posts
-                  posts = [];
-                  for (i = 0; i < 5; i++) {
-                    newPost = new Post({
-                      title: rando(),
-                      categories: categories,
-                      author: author,
-                      content: rando(),
-                    });
-                    posts.push(newPost);
-                  }
+      //create multi category posts
+      posts = [];
+      for (i = 0; i < 5; i++) {
+        newPost = new Post({
+          title: rando(),
+          categories: categories,
+          author: author,
+          content: rando(),
+        });
+        posts.push(newPost);
+        await newPost.save();
+      }
 
-                  //save all posts
-                  async.each(
-                    posts,
-                    function (post, cb) {
-                      post.save(cb);
-                    },
-                    function (err, result) {
-                      done();
-                    }
-                  );
-                }
-              );
-            }
-          );
-        }
-      );
+      done();
     });
 
-    afterEach(function (done) {
-      async.parallel(
-        [
-          function (cb) {
-            Category.remove({}, cb);
-          },
-          function (cb) {
-            Post.remove({}, cb);
-          },
-          function (cb) {
-            Author.remove({}, cb);
-          },
-        ],
-        done
-      );
+    afterEach(async function (done) {
+      await Category.deleteMany({});
+      await Post.deleteMany({});
+      await Author.deleteMany({});
+      done();
     });
 
     var required = [
@@ -208,7 +174,7 @@ describe("reverse populate", function () {
         idField: "author",
         filters: { title: { $ne: firstPost.title } },
       };
-      reversePopulate(opts, function (err, authResult) {
+      reversePopulate(opts, function (_err, authResult) {
         assert.equal(authResult.length, 1);
         var author = authResult[0];
 
@@ -261,7 +227,7 @@ describe("reverse populate", function () {
         idField: "author",
         sort: "title",
       };
-      reversePopulate(opts, function (err, authResult) {
+      reversePopulate(opts, function (_err, authResult) {
         assert.equal(authResult.length, 1);
         var author = authResult[0];
 
@@ -284,7 +250,7 @@ describe("reverse populate", function () {
         idField: "author",
         populate: "categories",
       };
-      reversePopulate(opts, function (err, authResult) {
+      reversePopulate(opts, function (_err, authResult) {
         assert.equal(authResult.length, 1);
         idsMatch(authResult, authors);
 
@@ -323,89 +289,67 @@ describe("reverse populate", function () {
     });
 
     //create 2 x people, 2 x passports
-    beforeEach(function (done) {
-      Person.create(
-        {
-          firstName: rando(),
-          lastName: rando(),
-          dob: new Date(1984, 6, 27),
-        },
-        function (err, person) {
-          person1 = person;
+    beforeEach(async function (done) {
+      const person = await Person.create({
+        firstName: rando(),
+        lastName: rando(),
+        dob: new Date(1984, 6, 27),
+      });
 
-          Passport.create(
-            {
-              number: rando(),
-              expiry: new Date(2017, 1, 1),
-              owner: person,
-            },
-            function (err, passport) {
-              passport1 = passport;
+      person1 = person;
 
-              Person.create(
-                {
-                  firstName: rando(),
-                  lastName: rando(),
-                  dob: new Date(1984, 6, 27),
-                },
-                function (err, person) {
-                  person2 = person;
+      const passport = await Passport.create({
+        number: rando(),
+        expiry: new Date(2017, 1, 1),
+        owner: person,
+      });
 
-                  Passport.create(
-                    {
-                      number: rando(),
-                      expiry: new Date(2017, 1, 1),
-                      owner: person,
-                    },
-                    function (err, passport) {
-                      passport2 = passport;
-                      done();
-                    }
-                  );
-                }
-              );
-            }
-          );
-        }
-      );
+      passport1 = passport;
+
+      const secondPerson = await Person.create({
+        firstName: rando(),
+        lastName: rando(),
+        dob: new Date(1984, 6, 27),
+      });
+
+      person2 = secondPerson;
+
+      const secondPassport = await Passport.create({
+        number: rando(),
+        expiry: new Date(2017, 1, 1),
+        owner: secondPerson,
+      });
+      passport2 = secondPassport;
+      done();
     });
 
-    afterEach(function (done) {
-      async.parallel(
-        [
-          function (cb) {
-            Person.remove({}, cb);
-          },
-          function (cb) {
-            Passport.remove({}, cb);
-          },
-        ],
-        done
-      );
+    afterEach(async function (done) {
+      await Person.deleteMany({});
+      await Passport.deleteMany({});
+      done();
     });
 
-    it("should successfully reverse populate a one-to-one relationship", function (done) {
-      Person.find().exec(function (err, persons) {
-        var opts = {
-          modelArray: persons,
-          storeWhere: "passport",
-          arrayPop: false,
-          mongooseModel: Passport,
-          idField: "owner",
-        };
-        //as this is one-to-one result should not be populated inside an array
-        reversePopulate(opts, function (err, personsResult) {
-          personsResult.forEach(function (person) {
-            //if this is person1, check against passport1
-            if (person._id.equals(person1._id)) {
-              idMatch(person.passport, passport1);
-              //if this is person2, check against passport2
-            } else {
-              idMatch(person.passport, passport2);
-            }
-          });
-          done();
+    it("should successfully reverse populate a one-to-one relationship", async function (done) {
+      const persons = await Person.find({});
+      var opts = {
+        modelArray: persons,
+        storeWhere: "passport",
+        arrayPop: false,
+        mongooseModel: Passport,
+        idField: "owner",
+      };
+      //as this is one-to-one result should not be populated inside an array
+      reversePopulate(opts, function (_err, personsResult) {
+        personsResult.forEach(function (person) {
+          //if this is person1, check against passport1
+          if (person._id.equals(person1._id)) {
+            idMatch(person.passport, passport1);
+            //if this is person2, check against passport2
+          } else {
+            idMatch(person.passport, passport2);
+          }
         });
+        done();
       });
     });
   });
