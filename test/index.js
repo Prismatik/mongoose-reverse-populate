@@ -1,4 +1,4 @@
-const reversePopulate = require("../index.js");
+const { reversePopulate } = require("../src/index.js");
 
 const assert = require("assert");
 const _ = require("lodash");
@@ -197,7 +197,7 @@ describe("reverse populate", () => {
         assert.notEqual(typeof post.author, "undefined");
         assert.notEqual(typeof post.title, "undefined");
         //expect this to be undefined
-        assert.equal(typeof post.catgegory, "undefined");
+        assert.equal(typeof post.categories, "undefined");
       });
     });
 
@@ -239,6 +239,9 @@ describe("reverse populate", () => {
       const author = authResult[0];
       author.posts.forEach((post) => {
         assert.equal(post.categories.length, 2);
+        post.categories.forEach((category) => {
+          assert.equal(typeof category.name, "string");
+        });
         idsMatch(post.categories, categories);
       });
     });
