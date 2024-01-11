@@ -30,7 +30,7 @@ function buildQuery<
     },
   };
 
-  let query: QueryWithHelpers<NestedDocument[], NestedDocument> =
+  const query: QueryWithHelpers<NestedDocument[], NestedDocument> =
     options.mongooseModel.find<NestedDocument>(conditions);
 
   if (options.select) {
