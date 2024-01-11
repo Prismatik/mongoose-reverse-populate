@@ -4,7 +4,7 @@
   "description": "This module allows you to 'populate' a mongoose model where the relationship ids are stored on another mongoose model that is related to this model",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha -R spec --recursive"
+    "test": "tsc && ./node_modules/.bin/mocha -R spec --recursive"
   },
   "repository": {
     "type": "git",
@@ -22,8 +22,10 @@
   },
   "homepage": "https://github.com/Prismatik/mongoose-reverse-populate",
   "devDependencies": {
+    "@types/lodash": "^3.0.0",
+    "mocha": "^2.2.1",
     "mongoose": "^7.6.8",
-    "mocha": "^2.2.1"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "lodash": "^3.10.0"
