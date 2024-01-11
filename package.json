@@ -1,10 +1,13 @@
 {
   "name": "mongoose-reverse-populate",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "This module allows you to 'populate' a mongoose model where the relationship ids are stored on another mongoose model that is related to this model",
   "main": "dist/index.js",
   "scripts": {
-    "test": "tsc && ./node_modules/.bin/mocha -R spec --recursive"
+    "test": "npm run build && ./node_modules/.bin/mocha -R spec --recursive",
+    "lint": "eslint src/**/*",
+    "typescript": "tsc --noEmit",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -15,7 +18,7 @@
     "mongoose",
     "populate"
   ],
-  "author": "Simon Taylor",
+  "author": "Second Nature",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Prismatik/mongoose-reverse-populate/issues"
@@ -29,7 +32,6 @@
     "mongoose": "^7.6.8",
     "typescript": "^5.3.3"
   },
-  "dependencies": {},
   "engines": {
     "node": ">= 18"
   }
