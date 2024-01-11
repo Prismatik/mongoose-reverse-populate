@@ -1,4 +1,4 @@
-const { reversePopulate } = require("../src/index.js");
+const { reversePopulate } = require("../dist/index.js");
 
 const assert = require("assert");
 const mongoose = require("mongoose");
