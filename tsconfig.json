@@ -9,7 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node16",
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "declaration": true
   },
   "include": ["src/**/*"]
 }
