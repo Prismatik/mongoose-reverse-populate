@@ -1,7 +1,6 @@
 const { reversePopulate } = require("../src/index.js");
 
 const assert = require("assert");
-const _ = require("lodash");
 const mongoose = require("mongoose");
 
 mongoose.connect("mongodb://localhost/mongoose-reverse-populate-test");
@@ -202,7 +201,7 @@ describe("reverse populate", () => {
     });
 
     it('should "sort" the results returned', async () => {
-      const sortedTitles = _.pluck(posts, "title").sort();
+      const sortedTitles = posts.map((post) => post.title).sort();
 
       const opts = {
         modelArray: authors,
@@ -217,7 +216,7 @@ describe("reverse populate", () => {
       const author = authResult[0];
 
       assert.equal(author.posts.length, 5);
-      const postTitles = _.pluck(author.posts, "title");
+      const postTitles = author.posts.map((post) => post.title);
       assert.deepEqual(sortedTitles, postTitles);
     });
 
@@ -344,7 +343,7 @@ const idsMatch = (arr1, arr2) => {
   const arr1IDs = pluckIds(arr1);
   const arr2IDs = pluckIds(arr2);
 
-  const diff = _.difference(arr1IDs, arr2IDs);
+  const diff = arr1IDs.filter((id) => !arr2IDs.includes(id));
   assert.equal(diff.length, 0);
 };
 

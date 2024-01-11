@@ -22,14 +22,11 @@
   },
   "homepage": "https://github.com/Prismatik/mongoose-reverse-populate",
   "devDependencies": {
-    "@types/lodash": "^3.0.0",
     "mocha": "^2.2.1",
     "mongoose": "^7.6.8",
     "typescript": "^5.3.3"
   },
-  "dependencies": {
-    "lodash": "^3.10.0"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">= 18"
   }
