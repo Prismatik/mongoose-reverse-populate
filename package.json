@@ -22,6 +22,9 @@
   },
   "homepage": "https://github.com/Prismatik/mongoose-reverse-populate",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.56.0",
     "mocha": "^2.2.1",
     "mongoose": "^7.6.8",
     "typescript": "^5.3.3"
