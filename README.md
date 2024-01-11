@@ -30,11 +30,11 @@ const popAuthors = await reversePopulate(options);
 
 ## Inputs
 
-The function expects an opts object (options)
+The function expects an options object
 
-function(opts) {...}
+function(options) {...}
 
-#### opts
+#### options
 
 The options object should contain the following properties...
 
