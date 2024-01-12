@@ -23,6 +23,7 @@ function buildQuery<
   StoreWhere extends string,
   ArrayPop extends boolean
 >(options: Options<TopLevelDocument, NestedDocument, StoreWhere, ArrayPop>) {
+  // @ts-expect-error _id is a mandatory field on mongoose documents
   const ids = options.modelArray.map((model) => model._id);
 
   const conditions: FilterQuery<NestedDocument> = {
@@ -64,6 +65,7 @@ function populateResult<TopLevelDocument, NestedDocument>(
   result: NestedDocument
 ): void {
   if (arrayPop) {
+    // @ts-expect-error TypeScript doesn't like dynamic property access
     if (typeof match[storeWhere] === "undefined") {
       // @ts-expect-error TypeScript doesn't like dynamic property access
       match[storeWhere] = [];
@@ -148,6 +150,7 @@ export async function reversePopulate<
   modelArray.forEach((model) => {
     modelIndex = {
       ...modelIndex,
+      // @ts-expect-error _id is a mandatory field on mongoose documents
       [model._id as string]: model,
     };
   });
@@ -188,5 +191,6 @@ export async function reversePopulate<
   });
 
   // Callback with passed modelArray
+  // @ts-expect-error As we dynamically add the populated field, this throws an error
   return modelArray;
 }
