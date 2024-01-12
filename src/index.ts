@@ -2,12 +2,13 @@ import { Model, QueryWithHelpers, FilterQuery } from "mongoose";
 
 // Check all mandatory fields have been provided
 function checkRequired<
-  TopLevelDocument extends Record<string, unknown>,
-  NestedDocument extends Record<string, unknown>,
-  StoreWhere extends string
+  TopLevelDocument,
+  NestedDocument,
+  StoreWhere extends string,
+  ArrayPop extends boolean
 >(
   required: typeof REQUIRED_FIELDS,
-  options: Options<TopLevelDocument, NestedDocument, StoreWhere>
+  options: Options<TopLevelDocument, NestedDocument, StoreWhere, ArrayPop>
 ): void {
   required.forEach((fieldName) => {
     if (options[fieldName] == null)
@@ -17,10 +18,11 @@ function checkRequired<
 
 // Build the query string with user provided options
 function buildQuery<
-  TopLevelDocument extends Record<string, unknown>,
-  NestedDocument extends Record<string, unknown>,
-  StoreWhere extends string
->(options: Options<TopLevelDocument, NestedDocument, StoreWhere>) {
+  TopLevelDocument,
+  NestedDocument,
+  StoreWhere extends string,
+  ArrayPop extends boolean
+>(options: Options<TopLevelDocument, NestedDocument, StoreWhere, ArrayPop>) {
   const ids = options.modelArray.map((model) => model._id);
 
   const conditions: FilterQuery<NestedDocument> = {
@@ -55,10 +57,7 @@ function getSelectString(selectStr: string, requiredId: string): string {
   return selectStr;
 }
 
-function populateResult<
-  TopLevelDocument extends Record<string, unknown>,
-  NestedDocument extends Record<string, unknown>
->(
+function populateResult<TopLevelDocument, NestedDocument>(
   storeWhere: string,
   arrayPop: boolean,
   match: TopLevelDocument,
@@ -78,10 +77,7 @@ function populateResult<
   }
 }
 
-function createPopulateResult<
-  TopLevelDocument extends Record<string, unknown>,
-  NestedDocument extends Record<string, unknown>
->(
+function createPopulateResult<TopLevelDocument, NestedDocument>(
   storeWhere: string,
   arrayPop: boolean
 ): (match: TopLevelDocument, result: NestedDocument) => void {
@@ -92,25 +88,28 @@ function createPopulateResult<
 }
 
 interface Options<
-  TopLevelDocument extends Record<string, unknown>,
-  NestedDocument extends Record<string, unknown>,
-  StoreWhere extends string
+  TopLevelDocument,
+  NestedDocument,
+  StoreWhere extends string,
+  ArrayPop extends boolean
 > {
   modelArray: TopLevelDocument[];
   storeWhere: StoreWhere;
-  arrayPop: boolean;
+  arrayPop: ArrayPop;
   mongooseModel: Model<NestedDocument>;
   idField: keyof NestedDocument;
   filters?: FilterQuery<NestedDocument>;
   sort?: string;
-  populate?: {
-    path: string;
-    select?: string;
-    populate?: {
-      path: string;
-      select: string;
-    };
-  }[];
+  populate?:
+    | {
+        path: string;
+        select?: string;
+        populate?: {
+          path: string;
+          select: string;
+        };
+      }
+    | string[];
   select?: string;
 }
 
@@ -123,16 +122,16 @@ const REQUIRED_FIELDS = [
 ] as const;
 
 export async function reversePopulate<
-  TopLevelDocument extends Record<string, unknown>,
-  NestedDocument extends Record<string, unknown>,
-  StoreWhere extends string
+  TopLevelDocument,
+  NestedDocument,
+  StoreWhere extends string,
+  ArrayPop extends boolean
 >(
-  options: Options<TopLevelDocument, NestedDocument, StoreWhere>
+  options: Options<TopLevelDocument, NestedDocument, StoreWhere, ArrayPop>
 ): Promise<
-  | (TopLevelDocument & {
-      [key in StoreWhere]: NestedDocument[];
-    })[]
-  | TopLevelDocument[]
+  ArrayPop extends true
+    ? (TopLevelDocument & { [key in StoreWhere]: NestedDocument[] })[]
+    : (TopLevelDocument & { [key in StoreWhere]: NestedDocument })[]
 > {
   // Check required fields have been provided
   checkRequired(REQUIRED_FIELDS, options);
@@ -141,7 +140,7 @@ export async function reversePopulate<
 
   // If empty array passed, exit!
   if (!modelArray.length) {
-    return modelArray;
+    return [];
   }
 
   // Transform the model array for easy lookups
