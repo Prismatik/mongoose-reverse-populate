@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run build && ./node_modules/.bin/mocha -R spec --recursive",
-    "lint": "eslint src/**/*",
+    "lint": "eslint src/**/* test/**/*",
     "typescript": "tsc --noEmit",
     "build": "tsc"
   },
@@ -25,12 +25,15 @@
   },
   "homepage": "https://github.com/Prismatik/mongoose-reverse-populate",
   "devDependencies": {
+    "@types/mocha": "^10.0.6",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.18.1",
     "eslint": "^8.56.0",
     "mocha": "^2.2.1",
-    "mongoose": "^7.6.8",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "mongoose": "^7.6.8"
   },
   "engines": {
     "node": ">= 18"
